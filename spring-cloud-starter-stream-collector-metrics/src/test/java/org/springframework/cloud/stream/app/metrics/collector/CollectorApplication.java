@@ -1,4 +1,4 @@
-package com.example;
+package org.springframework.cloud.stream.app.metrics.collector;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

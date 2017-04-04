@@ -1,4 +1,4 @@
-package com.example;
+package org.springframework.cloud.stream.app.metrics.collector;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

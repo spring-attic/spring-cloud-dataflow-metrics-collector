@@ -20,7 +20,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud.stream.app</groupId>
-				<artifactId>spring-cloud-starter-stream-metrics-collector</artifactId>
+				<artifactId>spring-cloud-starter-stream-collector-metrics</artifactId>
 				<version>1.0.0.BUILD-SNAPSHOT</version>
 			</dependency>
 		</dependencies>

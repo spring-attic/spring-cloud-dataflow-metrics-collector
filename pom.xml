@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>spring-cloud-dataflow-metrics-collector-build</artifactId>
+	<artifactId>spring-cloud-dataflow-collector-metrics-build</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -14,7 +14,7 @@
 	</parent>
 
 	<modules>
-		<module>spring-cloud-starter-stream-metrics-collector</module>
+		<module>spring-cloud-starter-stream-collector-metrics</module>
 		<module>spring-cloud-dataflow-metrics-collector-dependencies</module>
 	</modules>
 	
