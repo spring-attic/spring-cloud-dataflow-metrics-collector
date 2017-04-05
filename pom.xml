@@ -29,7 +29,9 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
+	<properties>
+		<java.version>1.8</java.version>
+	</properties>
 	<profiles>
 		<profile>
 			<id>spring</id>
