@@ -18,6 +18,7 @@ package org.springframework.cloud.stream.app.metrics.collector;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +27,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.Assert;
 import org.junit.Test;
 
+import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.cloud.stream.app.metrics.collector.model.Application;
 import org.springframework.cloud.stream.app.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.stream.app.metrics.collector.model.Instance;
@@ -194,15 +196,17 @@ public class MetricsAggregatorTests extends BaseCacheTests{
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index, Double incomingRate, Double outgoingRate){
 
-		ApplicationMetrics metrics = new ApplicationMetrics(streamName+"."+applicationName+"."+appGuid, Collections.emptyList());
+		ApplicationMetrics applicationMetrics = new ApplicationMetrics(streamName+"."+applicationName+"."+appGuid, new LinkedList<>());
 		Map<String,Object> properties = new HashMap<>();
 		properties.put(ApplicationMetrics.STREAM_NAME,streamName);
 		properties.put(ApplicationMetrics.APPLICATION_NAME,applicationName);
 		properties.put(ApplicationMetrics.APPLICATION_GUID,appGuid);
 		properties.put(ApplicationMetrics.INSTANCE_INDEX,index);
+		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.INPUT_METRIC_NAME,incomingRate));
+		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.OUTPUT_METRIC_NAME,outgoingRate));
 		properties.put(MetricsAggregator.INPUT_METRIC_NAME,incomingRate);
 		properties.put(MetricsAggregator.OUTPUT_METRIC_NAME,outgoingRate);
-		metrics.setProperties(properties);
-		return metrics;
+		applicationMetrics.setProperties(properties);
+		return applicationMetrics;
 	}
 }
