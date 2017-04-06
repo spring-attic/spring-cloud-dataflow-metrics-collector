@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * @author Vinicius Carvalho
  */
-@ConfigurationProperties(prefix = "spring.cloud.stream.metrics.collector")
+@ConfigurationProperties(prefix = "spring.cloud.dataflow.metrics.collector")
 public class MetricCollectorProperties {
 	private Integer evictionTimeout = 30;
 
