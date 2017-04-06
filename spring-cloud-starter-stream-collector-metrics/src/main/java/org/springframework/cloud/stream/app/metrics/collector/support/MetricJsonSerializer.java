@@ -47,7 +47,7 @@ public class MetricJsonSerializer {
 		public void serialize(Metric metric, JsonGenerator json, SerializerProvider serializerProvider) throws IOException {
 			json.writeStartObject();
 			json.writeStringField("name",metric.getName());
-			json.writeNumberField("currentValue",metric.getValue().doubleValue());
+			json.writeNumberField("value",metric.getValue().doubleValue());
 			json.writeStringField("timestamp",df.format(metric.getTimestamp()));
 			json.writeEndObject();
 		}
@@ -60,7 +60,7 @@ public class MetricJsonSerializer {
 		public Metric deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 			JsonNode node = p.getCodec().readTree(p);
 			String name = node.get("name").asText();
-			Number value = node.get("currentValue").asDouble();
+			Number value = node.get("value").asDouble();
 			Date timestamp = null;
 
 			try {
