@@ -5,7 +5,7 @@
 	<artifactId>spring-cloud-starter-dataflow-collector-metrics</artifactId>
 	<packaging>jar</packaging>
 	<name>spring-cloud-starter-dataflow-collector-metrics</name>
-	<description>Spring Cloud Dataflow Metrics Collector core</description>
+	<description>Spring Cloud Data Flow Metrics Collector core</description>
 
 	<parent>
           <groupId>org.springframework.cloud</groupId>
