@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>spring-cloud-starter-dataflow-collector-metrics</artifactId>
+	<packaging>jar</packaging>
+	<name>spring-cloud-starter-dataflow-collector-metrics</name>
+	<description>Spring Cloud Dataflow Metrics Collector core</description>
+
+	<parent>
+          <groupId>org.springframework.cloud</groupId>
+	  <artifactId>spring-cloud-dataflow-collector-metrics-build</artifactId>
+	  <version>1.0.0.BUILD-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.cloud.stream.app.plugin</groupId>
+				<artifactId>spring-cloud-stream-app-maven-plugin</artifactId>
+				<configuration>
+					<generatedProjectHome>${session.executionRootDirectory}/apps</generatedProjectHome>
+					<generatedProjectVersion>${project.version}</generatedProjectVersion>
+					<bom>
+						<name>scs-bom</name>
+						<groupId>org.springframework.cloud</groupId>
+						<artifactId>spring-cloud-dataflow-metrics-collector-dependencies</artifactId>
+						<version>${project.version}</version>
+					</bom>
+					<generatedApps>
+						<metrics-collector>
+							<starterGroupId>org.springframework.cloud</starterGroupId>
+							<starterArtifactId>spring-cloud-starter-dataflow-collector-metrics</starterArtifactId>
+							<autoConfigClass>org.springframework.cloud.dataflow.metrics.collector.MetricsCollectorConfiguration.class</autoConfigClass>
+						</metrics-collector>
+					</generatedApps>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
