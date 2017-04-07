@@ -2,25 +2,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.springframework.cloud.stream.app</groupId>
 	<artifactId>spring-cloud-dataflow-metrics-collector-dependencies</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>metrics-collector-dependencies</name>
-	<description>Spring Cloud Stream HTTP App Dependencies</description>
+	<description>Spring Cloud Data Flow Metrics Collector App Dependencies</description>
 
 	<parent>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>1.2.1.RELEASE</version>
+		<version>1.3.1.RELEASE</version>
 		<relativePath/>
 	</parent>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.springframework.cloud.stream.app</groupId>
-				<artifactId>spring-cloud-starter-stream-collector-metrics</artifactId>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-dataflow-metrics-collector</artifactId>
 				<version>1.0.0.BUILD-SNAPSHOT</version>
 			</dependency>
 			<dependency>
