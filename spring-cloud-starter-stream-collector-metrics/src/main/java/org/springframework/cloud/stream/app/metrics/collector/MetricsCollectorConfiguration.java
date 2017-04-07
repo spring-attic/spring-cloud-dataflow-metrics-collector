@@ -26,8 +26,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.app.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.stream.app.metrics.collector.model.ApplicationMetrics;
-import org.springframework.cloud.stream.app.metrics.collector.model.Stream;
-import org.springframework.cloud.stream.app.metrics.collector.support.CacheRemovalListener;
 import org.springframework.cloud.stream.app.metrics.collector.support.MetricJsonSerializer;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.context.annotation.Bean;
@@ -59,33 +57,21 @@ public class MetricsCollectorConfiguration {
 	 * @throws Exception
 	 */
 	@Bean
-	public Cache<String, ApplicationMetrics> rawCache(Cache<String,Stream> streamCache) throws Exception{
-		CacheRemovalListener removalListener = new CacheRemovalListener(streamCache);
+	public Cache<String, ApplicationMetrics> rawCache() throws Exception{
 		return Caffeine.<String,ApplicationMetrics>newBuilder()
-				.expireAfterAccess(properties.getEvictionTimeout(), TimeUnit.SECONDS)
-				.removalListener(removalListener)
+				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS)
 				.build();
 	}
 
-	/**
-	 * This cache holds a hierarchical view of the raw cache. This is what is ultimately returned by this collector to the
-	 * Dataflow server. Check {@link Stream} for the contract of the data
-	 * @return
-	 */
+
+
 	@Bean
-	public Cache<String, Stream> streamCache() {
-		return Caffeine.<String,Stream>newBuilder()
-				.expireAfterAccess(properties.getEvictionTimeout(), TimeUnit.SECONDS)
-				.build();
+	public MetricsAggregator metricsAggregator(Cache<String,ApplicationMetrics> rawCache){
+		return new MetricsAggregator(rawCache);
 	}
 
 	@Bean
-	public MetricsAggregator metricsAggregator(Cache<String,Stream> streamCache, Cache<String,ApplicationMetrics> rawCache){
-		return new MetricsAggregator(streamCache,rawCache);
-	}
-
-	@Bean
-	public MetricsCollectorEndpoint metricsCollectorEndpoint(Cache<String,Stream> streamCache){
-		return new MetricsCollectorEndpoint(streamCache);
+	public MetricsCollectorEndpoint metricsCollectorEndpoint(Cache<String,ApplicationMetrics> rawCache){
+		return new MetricsCollectorEndpoint(rawCache);
 	}
 }
