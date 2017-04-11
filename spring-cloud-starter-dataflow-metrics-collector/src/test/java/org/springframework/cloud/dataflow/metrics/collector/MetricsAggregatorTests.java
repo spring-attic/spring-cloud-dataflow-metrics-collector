@@ -212,6 +212,22 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 		Assert.assertEquals(2, endpoint.fetchMetrics("httpIngest,woodchuck").getBody().getContent().size());
 	}
+	@Test
+	public void filterUsingInvalidDelimiter() throws Exception {
+		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
+		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
+		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
+		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0, 1.0, 0.0);
+
+		aggregator.receive(app);
+		aggregator.receive(app2);
+		aggregator.receive(app3);
+
+		Assert.assertEquals(0, endpoint.fetchMetrics("httpIngest;woodchuck").getBody().getContent().size());
+	}
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index,
 			Double incomingRate, Double outgoingRate) {

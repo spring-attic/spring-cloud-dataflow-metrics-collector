@@ -37,7 +37,7 @@ public class ApplicationMetrics {
 	public static final String SERVER_NAME = "spring.cloud.dataflow.server.name";
 	public static final String APPLICATION_TYPE = "spring.cloud.dataflow.stream.app.type";
 	public static final String APPLICATION_GUID = "spring.cloud.application.guid";
-	public static final String INSTANCE_INDEX = "spring.cloud.stream.instanceIndex";
+	public static final String INSTANCE_INDEX = "spring.application.index";
 	public static final String APPLICATION_METRICS_JSON = "application/vnd.spring.cloud.stream.metrics.v1+json";
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
