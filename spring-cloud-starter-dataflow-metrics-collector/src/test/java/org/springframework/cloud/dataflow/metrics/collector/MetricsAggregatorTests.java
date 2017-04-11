@@ -127,6 +127,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		application = streamMetrics.getApplications().get(0);
 		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
+		Assert.assertEquals(1, endpoint.fetchMetrics("").getBody().getContent().size());
 		Assert.assertEquals(2, application.getInstances().size());
 
 	}
@@ -200,10 +201,12 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
 
 		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
+		ApplicationMetrics app1 = createMetrics("httpIngest", "http", "foobar", 1, 1.0, 0.0);
 		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
 		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0, 1.0, 0.0);
 
 		aggregator.receive(app);
+		aggregator.receive(app1);
 		aggregator.receive(app2);
 		aggregator.receive(app3);
 

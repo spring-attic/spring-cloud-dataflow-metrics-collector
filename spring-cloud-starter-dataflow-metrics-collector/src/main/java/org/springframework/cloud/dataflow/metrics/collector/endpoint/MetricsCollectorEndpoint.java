@@ -69,11 +69,10 @@ public class MetricsCollectorEndpoint {
 			StreamMetrics streamMetrics = null;
 			for(ApplicationMetrics app : applicationMetrics){
 				streamMetrics = convert(app, streamMetrics);
-				if(streamMetrics!= null){
-					entries.add(streamMetrics);
-				}
 			}
-
+			if(streamMetrics!= null){
+				entries.add(streamMetrics);
+			}
 		}else{
 			Set<String> names = StringUtils.commaDelimitedListToSet(name);
 			for(String streamName : names){
