@@ -30,8 +30,12 @@ import org.springframework.cloud.dataflow.metrics.collector.MetricsAggregator;
 import org.springframework.cloud.dataflow.metrics.collector.model.Application;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.model.Instance;
-import org.springframework.cloud.dataflow.metrics.collector.model.Stream;
+import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.utils.YANUtils;
+import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +49,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Vinicius Carvalho
  */
 @RestController
-@RequestMapping("/collector")
+@RequestMapping("/collector/metrics/streams")
+@ExposesResourceFor(StreamMetrics.class)
 public class MetricsCollectorEndpoint {
 
 	private Cache<String,ApplicationMetrics> rawCache;
@@ -54,44 +59,57 @@ public class MetricsCollectorEndpoint {
 		this.rawCache = rawCache;
 	}
 
-	@RequestMapping(value = "/metrics", produces = {MediaType.APPLICATION_JSON_VALUE})
-	public ResponseEntity<Collection<Stream>> fetchMetrics(@RequestParam(value = "name", defaultValue = "") String name){
-		Collection<Stream> entries = new LinkedList<>();
+	@RequestMapping (produces = {MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<PagedResources<StreamMetrics>> fetchMetrics(@RequestParam(value = "name", defaultValue = "") String name){
+		Collection<StreamMetrics> entries = new LinkedList<>();
 
 		Set<String> streamNames = null;
 		if(StringUtils.isEmpty(name)){
-			streamNames = rawCache.asMap().values().stream().map(applicationMetrics -> String.valueOf(applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME))).collect(Collectors.toSet());
+			Collection<ApplicationMetrics> applicationMetrics = rawCache.asMap().values();
+			StreamMetrics streamMetrics = null;
+			for(ApplicationMetrics app : applicationMetrics){
+				streamMetrics = convert(app, streamMetrics);
+				if(streamMetrics!= null){
+					entries.add(streamMetrics);
+				}
+			}
+
 		}else{
 			Set<String> names = StringUtils.commaDelimitedListToSet(name);
+			for(String streamName : names){
+				StreamMetrics streamMetrics = null;
+				List<ApplicationMetrics> filteredList = rawCache.asMap().values().stream().filter(applicationMetrics ->
+						applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME).equals(streamName)).collect(Collectors.toList());
+				for(ApplicationMetrics applicationMetrics : filteredList){
+					streamMetrics = convert(applicationMetrics, streamMetrics);
+				}
+				if(streamMetrics!= null){
+					entries.add(streamMetrics);
+				}
+			}
 		}
 
-		for(String streamName : streamNames){
-			Stream stream = null;
-			List<ApplicationMetrics> filteredList = rawCache.asMap().values().stream().filter(applicationMetrics ->
-					applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME).equals(streamName)).collect(Collectors.toList());
-			for(ApplicationMetrics applicationMetrics : filteredList){
-				stream = convert(applicationMetrics,stream);
-			}
-			entries.add(stream);
-		}
-		return new ResponseEntity<Collection<Stream>>(entries, HttpStatus.OK);
+		int totalPages = (entries.size() == 0) ? 0 : entries.size()/entries.size();
+		PagedResources.PageMetadata pageMetadata = new PagedResources.PageMetadata(entries.size(),0,entries.size(),totalPages);
+		PagedResources<StreamMetrics> pagedResources = new PagedResources<>(entries,pageMetadata, ControllerLinkBuilder.linkTo(MetricsCollectorEndpoint.class).withRel(Link.REL_SELF));
+		return new ResponseEntity<PagedResources<StreamMetrics>>(pagedResources, HttpStatus.OK);
 	}
 
 	/**
 	 * Converts a denormalized view of each application instance metric ({@link ApplicationMetrics}) into a
-	 * hierarchical model {@link Stream}
+	 * hierarchical model {@link StreamMetrics}
 	 * @param applicationMetrics object to be converted
 	 * @param root The root object of the hierarchy - null if the first conversion
-	 * @return a hierarchical view of metrics using {@link Stream} as the root object
+	 * @return a hierarchical view of metrics using {@link StreamMetrics} as the root object
 	 */
-	private Stream convert(ApplicationMetrics applicationMetrics, Stream root){
+	private StreamMetrics convert(ApplicationMetrics applicationMetrics, StreamMetrics root){
 		Assert.notNull(applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME),
 				"Missing STREAM_NAME from metrics properties");
 		Assert.notNull(applicationMetrics.getProperties().get(ApplicationMetrics.APPLICATION_NAME),
 				"Missing APPLICATION_NAME from metrics properties");
 		Assert.notNull(applicationMetrics.getProperties().get(ApplicationMetrics.APPLICATION_GUID),
 				"Missing APPLICATION_GUID from metrics properties");
-		Stream stream = (root == null) ? new Stream((String) applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME)) : root;
+		StreamMetrics streamMetrics = (root == null) ? new StreamMetrics((String) applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME)) : root;
 		Application application = new Application(
 				(String) applicationMetrics.getProperties().get(ApplicationMetrics.APPLICATION_NAME));
 		Double incomeRate = YANUtils
@@ -109,17 +127,18 @@ public class MetricsCollectorEndpoint {
 				outgoingRate);
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setIndex(instanceIndex);
-		int applicationIndex = stream.getApplications().indexOf(application);
+		instance.setKey(applicationMetrics.getName());
+		int applicationIndex = streamMetrics.getApplications().indexOf(application);
 		if(applicationIndex < 0){
 			application.getInstances().add(instance);
-			stream.getApplications().add(application);
+			streamMetrics.getApplications().add(application);
 		}else{
-			int idx = stream.getApplications().get(applicationIndex).getInstances().indexOf(instance);
+			int idx = streamMetrics.getApplications().get(applicationIndex).getInstances().indexOf(instance);
 			if(idx < 0){
-				stream.getApplications().get(applicationIndex).getInstances().add(instance);
+				streamMetrics.getApplications().get(applicationIndex).getInstances().add(instance);
 			}
 		}
-		return stream;
+		return streamMetrics;
 	}
 
 	private Metric<?> findMetric(Collection<Metric<?>> metrics, String name) {

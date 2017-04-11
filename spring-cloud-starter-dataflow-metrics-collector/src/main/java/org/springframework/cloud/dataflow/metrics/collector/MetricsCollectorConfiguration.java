@@ -23,6 +23,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.metrics.collector.endpoint.RootEndpoint;
+import org.springframework.cloud.dataflow.metrics.collector.support.ApplicationMetricsBindingPostProcessor;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
@@ -30,6 +32,7 @@ import org.springframework.cloud.dataflow.metrics.collector.support.MetricJsonSe
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.hateoas.EntityLinks;
 
 
 /**
@@ -50,10 +53,10 @@ public class MetricsCollectorConfiguration {
 	}
 
 	/**
-	 * This cache holds "raw" instances from messages arriving over the sink. It's lifecycle controls the normalized cache by
-	 * evicting entries on the normalized cache as they get evicted here.
+	 * Provides the underlying storage for received messages. Eviction can be controlled via
+	 * property spring.cloud.dataflow.metrics.collector.evictionTimeout
 	 *
-	 * @return
+	 * @return A {@link Cache} with configured eviction policy
 	 * @throws Exception
 	 */
 	@Bean
@@ -62,8 +65,6 @@ public class MetricsCollectorConfiguration {
 				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS)
 				.build();
 	}
-
-
 
 	@Bean
 	public MetricsAggregator metricsAggregator(Cache<String,ApplicationMetrics> rawCache){
@@ -74,4 +75,5 @@ public class MetricsCollectorConfiguration {
 	public MetricsCollectorEndpoint metricsCollectorEndpoint(Cache<String,ApplicationMetrics> rawCache){
 		return new MetricsCollectorEndpoint(rawCache);
 	}
+
 }

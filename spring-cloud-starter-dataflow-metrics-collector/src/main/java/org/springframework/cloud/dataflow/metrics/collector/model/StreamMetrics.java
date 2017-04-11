@@ -21,12 +21,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import org.springframework.hateoas.ResourceSupport;
+
 /**
  * @author Vinicius Carvalho
  */
-public class Stream {
+public class StreamMetrics{
 	@JsonCreator
-	public Stream(String name) {
+	public StreamMetrics(String name) {
 		this.name = name;
 	}
 
