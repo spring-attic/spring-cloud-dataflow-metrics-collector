@@ -20,9 +20,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.boot.actuate.metrics.Metric;
@@ -30,12 +34,27 @@ import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsColl
 import org.springframework.cloud.dataflow.metrics.collector.model.Application;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.model.Instance;
-import org.springframework.cloud.dataflow.metrics.collector.model.Stream;
+import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * @author Vinicius Carvalho
  */
 public class MetricsAggregatorTests extends BaseCacheTests {
+
+	@Before
+	public void setup() {
+		HttpServletRequest mockRequest = new MockHttpServletRequest();
+		ServletRequestAttributes servletRequestAttributes = new ServletRequestAttributes(mockRequest);
+		RequestContextHolder.setRequestAttributes(servletRequestAttributes);
+	}
+
+	@After
+	public void teardown() {
+		RequestContextHolder.resetRequestAttributes();
+	}
 
 	@Test
 	public void includeOneMetric() throws Exception {
@@ -46,11 +65,12 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
-		Stream stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		Application application = stream.getApplications().get(0);
-		Assert.assertNotNull(stream);
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Application application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
 		Instance instance = application.getInstances().get(0);
+		Assert.assertEquals(app.getName(),instance.getKey());
 		Assert.assertEquals("foo", instance.getGuid());
 	}
 
@@ -63,9 +83,9 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
-		Stream stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		Application application = stream.getApplications().get(0);
-		Assert.assertNotNull(stream);
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Application application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
@@ -74,9 +94,9 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app2);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
-		stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		application = stream.getApplications().get(0);
-		Assert.assertNotNull(stream);
+		streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
 		instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
@@ -92,9 +112,9 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
-		Stream stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		Application application = stream.getApplications().get(0);
-		Assert.assertNotNull(stream);
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Application application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
@@ -103,12 +123,17 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app2);
 
 		Assert.assertEquals(2, rawCache.estimatedSize());
-		stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		application = stream.getApplications().get(0);
-		Assert.assertNotNull(stream);
+		streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
+		Assert.assertEquals(1, endpoint.fetchMetrics("").getBody().getContent().size());
 		Assert.assertEquals(2, application.getInstances().size());
-
+		Instance i1 = application.getInstances().get(0);
+		Assert.assertNotNull(i1);
+		Instance i2 = application.getInstances().get(1);
+		Assert.assertNotNull(i2);
+		Assert.assertNotEquals(i1.getIndex(),i2.getIndex());
 	}
 
 	@Test
@@ -122,21 +147,21 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app);
 		aggregator.receive(app2);
 
-		Stream stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		Application application = stream.getApplications().get(0);
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Application application = streamMetrics.getApplications().get(0);
 		Instance instance = application.getInstances().get(0);
 
 		Assert.assertEquals(2, rawCache.estimatedSize());
-		stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		application = stream.getApplications().get(0);
-		Assert.assertNotNull(stream);
+		streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
 		Assert.assertEquals("http", application.getName());
 		Assert.assertEquals(2, application.getInstances().size());
 		rawCache.invalidate("httpIngest.http.bar");
 		Thread.sleep(1000);
 		Assert.assertEquals(1, rawCache.estimatedSize());
-		stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		application = stream.getApplications().get(0);
+		streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		application = streamMetrics.getApplications().get(0);
 
 		Assert.assertEquals(1, application.getInstances().size());
 	}
@@ -154,8 +179,8 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app2);
 
 		Assert.assertEquals(2, rawCache.estimatedSize());
-		Stream stream = endpoint.fetchMetrics("").getBody().iterator().next();
-		Assert.assertEquals(2, stream.getApplications().size());
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Assert.assertEquals(2, streamMetrics.getApplications().size());
 	}
 
 	@Test
@@ -170,8 +195,44 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		aggregator.receive(app);
 		aggregator.receive(app2);
 
-		Assert.assertEquals(2, endpoint.fetchMetrics("").getBody().size());
+		Assert.assertEquals(2, endpoint.fetchMetrics("").getBody().getContent().size());
 	}
+
+	@Test
+	public void filterByStream() throws Exception {
+		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
+		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
+		ApplicationMetrics app1 = createMetrics("httpIngest", "http", "foobar", 1, 1.0, 0.0);
+		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
+		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0, 1.0, 0.0);
+
+		aggregator.receive(app);
+		aggregator.receive(app1);
+		aggregator.receive(app2);
+		aggregator.receive(app3);
+
+		Assert.assertEquals(2, endpoint.fetchMetrics("httpIngest,woodchuck").getBody().getContent().size());
+	}
+	@Test
+	public void filterUsingInvalidDelimiter() throws Exception {
+		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
+		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
+		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
+		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0, 1.0, 0.0);
+
+		aggregator.receive(app);
+		aggregator.receive(app2);
+		aggregator.receive(app3);
+
+		Assert.assertEquals(0, endpoint.fetchMetrics("httpIngest;woodchuck").getBody().getContent().size());
+	}
+
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index,
 			Double incomingRate, Double outgoingRate) {
@@ -182,7 +243,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		properties.put(ApplicationMetrics.STREAM_NAME, streamName);
 		properties.put(ApplicationMetrics.APPLICATION_NAME, applicationName);
 		properties.put(ApplicationMetrics.APPLICATION_GUID, appGuid);
-		properties.put(ApplicationMetrics.INSTANCE_INDEX, index);
+		properties.put(ApplicationMetrics.INSTANCE_INDEX, index.toString());
 		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.INPUT_METRIC_NAME, incomingRate));
 		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.OUTPUT_METRIC_NAME, outgoingRate));
 		properties.put(MetricsAggregator.INPUT_METRIC_NAME, incomingRate);

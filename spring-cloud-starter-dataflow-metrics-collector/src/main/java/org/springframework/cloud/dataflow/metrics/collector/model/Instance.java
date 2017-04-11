@@ -29,9 +29,15 @@ import org.springframework.cloud.dataflow.metrics.collector.utils.DeltaNumberHol
 public class Instance {
 
 	private String guid;
+
 	private Integer index;
+
+	private String key;
+
 	private Map<String,Object> properties;
+
 	private DeltaNumberHolder incomingRate;
+
 	private DeltaNumberHolder outgoingRate;
 
 	@JsonCreator
@@ -79,9 +85,18 @@ public class Instance {
 		return outgoingRate.getCurrentValue();
 	}
 
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
 	public void updateOutgoingRate(Double value){
 		this.outgoingRate.update(value);
 	}
+
 	public void updateIncomingRate(Double value){
 		this.incomingRate.update(value);
 	}

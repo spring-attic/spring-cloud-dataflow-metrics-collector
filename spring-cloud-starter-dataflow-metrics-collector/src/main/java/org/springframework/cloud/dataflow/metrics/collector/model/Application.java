@@ -25,14 +25,16 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  * @author Vinicius Carvalho
  */
 public class Application {
+
 	private String name;
+
+	private List<Instance> instances = new LinkedList<>();
+
 
 	@JsonCreator
 	public Application(String name) {
 		this.name = name;
 	}
-
-	private List<Instance> instances = new LinkedList<>();
 
 	public String getName() {
 		return name;
