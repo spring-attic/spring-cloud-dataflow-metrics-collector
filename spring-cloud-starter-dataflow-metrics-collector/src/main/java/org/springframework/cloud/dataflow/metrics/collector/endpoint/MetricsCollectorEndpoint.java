@@ -59,7 +59,7 @@ public class MetricsCollectorEndpoint {
 		this.rawCache = rawCache;
 	}
 
-	@RequestMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
+	@RequestMapping(produces = { "application/vnd.spring.cloud.dataflow.collector.v1.hal+json" })
 	public ResponseEntity<PagedResources<StreamMetrics>> fetchMetrics(
 			@RequestParam(value = "name", defaultValue = "") String name) {
 		Collection<StreamMetrics> entries = new LinkedList<>();
@@ -117,18 +117,13 @@ public class MetricsCollectorEndpoint {
 				: root;
 		Application application = new Application(
 				(String) applicationMetrics.getProperties().get(ApplicationMetrics.APPLICATION_NAME));
-		Double incomeRate = YANUtils
-				.cast(findMetric(applicationMetrics.getMetrics(), MetricsAggregator.INPUT_METRIC_NAME).getValue(),
-						Double.class)
-				.orElse(0.0);
-		Double outgoingRate = YANUtils
-				.cast(findMetric(applicationMetrics.getMetrics(), MetricsAggregator.OUTPUT_METRIC_NAME).getValue(),
-						Double.class)
-				.orElse(0.0);
+
+		Double incomeRate = YANUtils.toDouble(findMetric(applicationMetrics.getMetrics(), MetricsAggregator.INPUT_METRIC_NAME).getValue());
+
+		Double outgoingRate = YANUtils.toDouble(findMetric(applicationMetrics.getMetrics(), MetricsAggregator.OUTPUT_METRIC_NAME).getValue());
 
 		Integer instanceIndex = YANUtils
-				.cast(applicationMetrics.getProperties().get(ApplicationMetrics.INSTANCE_INDEX), Integer.class)
-				.orElse(0);
+				.toInteger(applicationMetrics.getProperties().get(ApplicationMetrics.INSTANCE_INDEX));
 
 		Instance instance = new Instance(
 				applicationMetrics.getProperties().get(ApplicationMetrics.APPLICATION_GUID).toString(), incomeRate,

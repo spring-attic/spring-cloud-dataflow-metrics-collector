@@ -129,7 +129,11 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals("http", application.getName());
 		Assert.assertEquals(1, endpoint.fetchMetrics("").getBody().getContent().size());
 		Assert.assertEquals(2, application.getInstances().size());
-
+		Instance i1 = application.getInstances().get(0);
+		Assert.assertNotNull(i1);
+		Instance i2 = application.getInstances().get(1);
+		Assert.assertNotNull(i2);
+		Assert.assertNotEquals(i1.getIndex(),i2.getIndex());
 	}
 
 	@Test
@@ -229,6 +233,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals(0, endpoint.fetchMetrics("httpIngest;woodchuck").getBody().getContent().size());
 	}
 
+
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index,
 			Double incomingRate, Double outgoingRate) {
 
@@ -238,7 +243,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		properties.put(ApplicationMetrics.STREAM_NAME, streamName);
 		properties.put(ApplicationMetrics.APPLICATION_NAME, applicationName);
 		properties.put(ApplicationMetrics.APPLICATION_GUID, appGuid);
-		properties.put(ApplicationMetrics.INSTANCE_INDEX, index);
+		properties.put(ApplicationMetrics.INSTANCE_INDEX, index.toString());
 		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.INPUT_METRIC_NAME, incomingRate));
 		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.OUTPUT_METRIC_NAME, outgoingRate));
 		properties.put(MetricsAggregator.INPUT_METRIC_NAME, incomingRate);

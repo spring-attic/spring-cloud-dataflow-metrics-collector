@@ -18,14 +18,44 @@ package org.springframework.cloud.dataflow.metrics.collector.utils;
 
 import java.util.Optional;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Yet Another Utils class
  * @author Vinicius Carvalho
  */
 public class YANUtils {
 	public static <S, T> Optional<T> cast(S candidate, Class<T> targetClass) {
-		return targetClass.isInstance(candidate)
-				? Optional.of(targetClass.cast(candidate))
-				: Optional.empty();
+		return targetClass.isInstance(candidate) ? Optional.of(targetClass.cast(candidate)) : Optional.empty();
+	}
+
+	public static Double toDouble(Object value){
+		Double result = 0.0;
+
+		if(value == null){
+			return result;
+		}
+		String stringVal = value.toString();
+		try{
+			result = Double.valueOf(stringVal);
+		}catch (NumberFormatException e){
+		}
+
+		return result;
+	}
+
+	public static Integer toInteger(Object value){
+		Integer result = 0;
+
+		if(value == null){
+			return result;
+		}
+		String stringVal = value.toString();
+		try{
+			result = Integer.valueOf(stringVal);
+		}catch (NumberFormatException e){
+		}
+		
+		return result;
 	}
 }

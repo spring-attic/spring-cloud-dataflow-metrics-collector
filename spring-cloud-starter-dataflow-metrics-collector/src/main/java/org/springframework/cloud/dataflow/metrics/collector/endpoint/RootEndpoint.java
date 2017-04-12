@@ -7,6 +7,7 @@ import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @ExposesResourceFor(RootEndpoint.class)
+@RequestMapping("/")
 public class RootEndpoint {
 
 	private final EntityLinks entityLinks;
@@ -22,7 +24,7 @@ public class RootEndpoint {
 		this.entityLinks = entityLinks;
 	}
 
-	@RequestMapping("/")
+	@RequestMapping(method = RequestMethod.GET, produces = { "application/vnd.spring.cloud.dataflow.collector.v1.hal+json" })
 	public RootResource info(){
 		String streamTemplated = entityLinks.linkToCollectionResource(StreamMetrics.class).getHref() + "?{name}";
 		RootResource rootResource = new RootResource();

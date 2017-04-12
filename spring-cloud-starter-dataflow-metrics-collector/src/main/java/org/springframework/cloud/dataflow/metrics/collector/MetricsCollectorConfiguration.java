@@ -24,7 +24,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.RootEndpoint;
-import org.springframework.cloud.dataflow.metrics.collector.support.ApplicationMetricsBindingPostProcessor;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
@@ -76,4 +75,8 @@ public class MetricsCollectorConfiguration {
 		return new MetricsCollectorEndpoint(rawCache);
 	}
 
+	@Bean
+	public RootEndpoint rootEndpoint(EntityLinks entityLinks){
+		return new RootEndpoint(entityLinks);
+	}
 }
