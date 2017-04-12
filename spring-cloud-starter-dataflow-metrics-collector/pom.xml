@@ -10,7 +10,7 @@
 
     <parent>
         <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dataflow-collector-metrics-build</artifactId>
+        <artifactId>spring-cloud-dataflow-metrics-collector-build</artifactId>
         <version>1.0.0.BUILD-SNAPSHOT</version>
     </parent>
 
