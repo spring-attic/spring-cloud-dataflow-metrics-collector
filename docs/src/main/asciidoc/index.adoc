@@ -1,0 +1,26 @@
+= Spring Cloud Data Flow Metric Collector Development Guide
+Vinicius Carvalho, Marius Bogoevici; Mark Pollack; Janne Valkealahti
+:doctype: book
+:toc:
+:toclevels: 4
+:source-highlighter: prettify
+:numbered:
+:icons: font
+:hide-uri-scheme:
+
+:spring-cloud-dataflow-docs: http://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
+:spring-cloud-dataflow-docs-current: http://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
+:spring-cloud-stream-docs: http://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
+:github-repo: spring-cloud/spring-cloud-dataflow
+:github-code: http://github.com/{github-repo}
+
+:dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
+
+// ======================================================================================
+
+include::overview.adoc[]
+include::getting-started.adoc[]
+include::appendix-contributing.adoc[]
+
+
+// ======================================================================================
