@@ -6,6 +6,7 @@ import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +25,7 @@ public class RootEndpoint {
 		this.entityLinks = entityLinks;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, produces = { "application/vnd.spring.cloud.dataflow.collector.v1.hal+json" })
+	@RequestMapping(method = RequestMethod.GET, produces = MediaTypes.HAL_JSON_VALUE)
 	public RootResource info(){
 		String streamTemplated = entityLinks.linkToCollectionResource(StreamMetrics.class).getHref() + "?{name}";
 		RootResource rootResource = new RootResource();

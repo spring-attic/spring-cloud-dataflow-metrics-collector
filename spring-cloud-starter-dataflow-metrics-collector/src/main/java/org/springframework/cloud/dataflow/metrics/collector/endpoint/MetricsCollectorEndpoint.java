@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.utils.YANUtils;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
@@ -59,7 +60,7 @@ public class MetricsCollectorEndpoint {
 		this.rawCache = rawCache;
 	}
 
-	@RequestMapping(produces = { "application/vnd.spring.cloud.dataflow.collector.v1.hal+json" })
+	@RequestMapping(produces = MediaTypes.HAL_JSON_VALUE)
 	public ResponseEntity<PagedResources<StreamMetrics>> fetchMetrics(
 			@RequestParam(value = "name", defaultValue = "") String name) {
 		Collection<StreamMetrics> entries = new LinkedList<>();
