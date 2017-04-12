@@ -16,6 +16,7 @@
     <modules>
         <module>spring-cloud-starter-dataflow-metrics-collector</module>
         <module>spring-cloud-dataflow-metrics-collector-dependencies</module>
+	<module>docs</module>
     </modules>
 
     <dependencyManagement>
