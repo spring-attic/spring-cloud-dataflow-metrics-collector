@@ -167,7 +167,7 @@ public class ApplicationMetricsService {
 			if (matcher.matches()) {
 				Metric previous = applicationMetricsList.size() < 2 ? null
 						: findMetric(applicationMetricsList.get(1).getMetrics(), metric.getName());
-				result.add(new Metric<Double>("integration.channel." + matcher.group(1) + ".send.rate",
+				result.add(new Metric<Double>("integration.channel." + matcher.group(1) + ".send.mean",
 						delta(metric, previous)));
 			}
 		}
