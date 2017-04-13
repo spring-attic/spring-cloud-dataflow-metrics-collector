@@ -18,6 +18,7 @@ public class ApplicationMetricsBindingPostProcessor implements EnvironmentPostPr
 		Map<String, Object> propertiesToAdd = new HashMap<>();
 		propertiesToAdd.put("spring.cloud.stream.bindings.input.destination",
 				"metrics");
+		propertiesToAdd.put("spring.jackson.default-property-inclusion","non_null");
 		environment.getPropertySources()
 				.addLast(new MapPropertySource("collectorDefaultProperties", propertiesToAdd));
 	}

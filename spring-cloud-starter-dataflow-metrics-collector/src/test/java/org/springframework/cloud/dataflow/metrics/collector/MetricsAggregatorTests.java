@@ -16,9 +16,14 @@
 
 package org.springframework.cloud.dataflow.metrics.collector;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -35,6 +40,8 @@ import org.springframework.cloud.dataflow.metrics.collector.model.Application;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.model.Instance;
 import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
+import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
+import org.springframework.cloud.dataflow.metrics.collector.utils.YANUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -58,10 +65,14 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 	@Test
 	public void includeOneMetric() throws Exception {
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+		Long now = System.currentTimeMillis();
+		Metric<Integer> inputSendCount = new Metric<Integer>("integration.channel.input.sendCount",10, new Date(now));
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo",0);
+		app.getMetrics().add(inputSendCount);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
 		aggregator.receive(app);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
@@ -72,14 +83,21 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals(app.getName(),instance.getKey());
 		Assert.assertEquals("foo", instance.getGuid());
+		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.rate")).findFirst().get();
+		Assert.assertEquals(0, YANUtils.toDouble(computed.getValue()).doubleValue(),0.0);
 	}
 
 	@Test
 	public void incrementMetric() throws Exception {
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+		Long now = System.currentTimeMillis();
+		Metric<Integer> inputSendCount = new Metric<Integer>("integration.channel.input.sendCount",10, new Date(now));
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		app.getMetrics().add(inputSendCount);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
+
 		aggregator.receive(app);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
@@ -89,8 +107,10 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals("http", application.getName());
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
-		Assert.assertEquals(new Double(1.0), instance.getIncomingRate());
-		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "foo", 0, 10.0, 0.0);
+
+		Metric<Integer> inputSendCount2 = new Metric<Integer>("integration.channel.input.sendCount",110, new Date(now+5000));
+		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "foo", 0);
+		app2.getMetrics().add(inputSendCount2);
 		aggregator.receive(app2);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
@@ -100,15 +120,18 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals("http", application.getName());
 		instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
-		Assert.assertEquals(new Double(10.0), instance.getIncomingRate());
+		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.rate")).findFirst().get();
+		Assert.assertEquals(20.0, YANUtils.toDouble(computed.getValue()).doubleValue(),0.0);
 	}
 
 	@Test
 	public void addInstance() throws Exception {
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
+
 		aggregator.receive(app);
 
 		Assert.assertEquals(1, rawCache.estimatedSize());
@@ -118,8 +141,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals("http", application.getName());
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
-		Assert.assertEquals(new Double(1.0), instance.getIncomingRate());
-		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "bar", 1, 10.0, 0.0);
+		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "bar", 1);
 		aggregator.receive(app2);
 
 		Assert.assertEquals(2, rawCache.estimatedSize());
@@ -138,11 +160,13 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 	@Test
 	public void removeInstance() throws Exception {
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "bar", 1, 10.0, 0.0);
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "bar", 1);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
+
 
 		aggregator.receive(app);
 		aggregator.receive(app2);
@@ -168,12 +192,14 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 	@Test
 	public void addApplication() throws Exception {
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
 
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		ApplicationMetrics app2 = createMetrics("httpIngest", "log", "bar", 0, 1.0, 0.0);
+
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		ApplicationMetrics app2 = createMetrics("httpIngest", "log", "bar", 0);
 
 		aggregator.receive(app);
 		aggregator.receive(app2);
@@ -185,12 +211,14 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 	@Test
 	public void addStream() throws Exception {
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
 
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
+
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0);
 
 		aggregator.receive(app);
 		aggregator.receive(app2);
@@ -200,14 +228,15 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 	@Test
 	public void filterByStream() throws Exception {
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
 
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		ApplicationMetrics app1 = createMetrics("httpIngest", "http", "foobar", 1, 1.0, 0.0);
-		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
-		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0, 1.0, 0.0);
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		ApplicationMetrics app1 = createMetrics("httpIngest", "http", "foobar", 1);
+		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0);
+		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0);
 
 		aggregator.receive(app);
 		aggregator.receive(app1);
@@ -218,13 +247,14 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 	}
 	@Test
 	public void filterUsingInvalidDelimiter() throws Exception {
-		Cache<String, ApplicationMetrics> rawCache = Caffeine.newBuilder().build();
-		MetricsAggregator aggregator = new MetricsAggregator(rawCache);
-		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(rawCache);
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
 
-		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0, 1.0, 0.0);
-		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0, 1.0, 0.0);
-		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0, 1.0, 0.0);
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		ApplicationMetrics app2 = createMetrics("woodchuck", "time", "bar", 0);
+		ApplicationMetrics app3 = createMetrics("twitter", "twitterstream", "bar", 0);
 
 		aggregator.receive(app);
 		aggregator.receive(app2);
@@ -233,9 +263,25 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals(0, endpoint.fetchMetrics("httpIngest;woodchuck").getBody().getContent().size());
 	}
 
+	@Test
+	public void testRegex() throws Exception {
+		Pattern pattern = Pattern.compile("integration\\.channel\\.(\\w*)\\.sendCount");
+
+		String test1 = "integration.channel.applicationMetrics.sendCount";
+		String test2 = "integration.channel.input.sendCount";
+		Matcher matcher = pattern.matcher(test1);
+		if(matcher.matches()){
+			String channel = matcher.group(1);
+		}
+
+	}
+
+	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index){
+		return createMetrics(streamName, applicationName, appGuid, index, new LinkedList<Metric<?>>());
+	}
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index,
-			Double incomingRate, Double outgoingRate) {
+			List<Metric<?>> metrics) {
 
 		ApplicationMetrics applicationMetrics = new ApplicationMetrics(
 				streamName + "." + applicationName + "." + appGuid, new LinkedList<>());
@@ -244,11 +290,8 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		properties.put(ApplicationMetrics.APPLICATION_NAME, applicationName);
 		properties.put(ApplicationMetrics.APPLICATION_GUID, appGuid);
 		properties.put(ApplicationMetrics.INSTANCE_INDEX, index.toString());
-		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.INPUT_METRIC_NAME, incomingRate));
-		applicationMetrics.getMetrics().add(new Metric<>(MetricsAggregator.OUTPUT_METRIC_NAME, outgoingRate));
-		properties.put(MetricsAggregator.INPUT_METRIC_NAME, incomingRate);
-		properties.put(MetricsAggregator.OUTPUT_METRIC_NAME, outgoingRate);
 		applicationMetrics.setProperties(properties);
+		applicationMetrics.setMetrics(metrics);
 		return applicationMetrics;
 	}
 }

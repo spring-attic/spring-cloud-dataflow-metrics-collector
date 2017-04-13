@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.metrics.collector.model;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import org.springframework.cloud.dataflow.metrics.collector.utils.DeltaNumberHolder;
-
+import org.springframework.boot.actuate.metrics.Metric;
 
 /**
  * @author Vinicius Carvalho
@@ -36,21 +36,12 @@ public class Instance {
 
 	private Map<String,Object> properties;
 
-	private DeltaNumberHolder incomingRate;
-
-	private DeltaNumberHolder outgoingRate;
+	private Collection<Metric<?>> metrics;
 
 	@JsonCreator
-	public Instance(String guid, Double incomeRate, Double outgoingRate) {
+	public Instance(String guid) {
 		this.guid = guid;
-		this.incomingRate = new DeltaNumberHolder(incomeRate);
-		this.outgoingRate = new DeltaNumberHolder(outgoingRate);
 	}
-
-	public Instance(String guid){
-		this(guid,0.0,0.0);
-	}
-
 
 	public String getGuid() {
 		return guid;
@@ -76,14 +67,6 @@ public class Instance {
 		this.properties = properties;
 	}
 
-	public Double getIncomingRate() {
-		return incomingRate.getCurrentValue();
-	}
-
-
-	public Double getOutgoingRate() {
-		return outgoingRate.getCurrentValue();
-	}
 
 	public String getKey() {
 		return key;
@@ -93,12 +76,21 @@ public class Instance {
 		this.key = key;
 	}
 
-	public void updateOutgoingRate(Double value){
-		this.outgoingRate.update(value);
+
+	/**
+	 * An instance of this class computes the delta between two measurements of {@link ApplicationMetrics}.
+	 * @param metrics
+	 */
+	public void refresh(Collection<Metric<?>> metrics){
+
 	}
 
-	public void updateIncomingRate(Double value){
-		this.incomingRate.update(value);
+	public Collection<Metric<?>> getMetrics() {
+		return metrics;
+	}
+
+	public void setMetrics(Collection<Metric<?>> metrics) {
+		this.metrics = metrics;
 	}
 
 	@Override

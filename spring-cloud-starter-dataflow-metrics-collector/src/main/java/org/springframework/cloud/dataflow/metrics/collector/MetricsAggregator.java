@@ -17,8 +17,11 @@
 package org.springframework.cloud.dataflow.metrics.collector;
 
 
+import java.util.LinkedList;
+
 import com.github.benmanes.caffeine.cache.Cache;
 
+import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.stream.messaging.Sink;
@@ -35,15 +38,15 @@ public class MetricsAggregator {
 
 	public static final String INPUT_METRIC_NAME = "integration.channel.input.sendRate.mean";
 
-	private Cache<String, ApplicationMetrics> rawCache;
+	private ApplicationMetricsService service;
 
-	public MetricsAggregator(Cache<String, ApplicationMetrics> rawCache) {
-		this.rawCache = rawCache;
+	public MetricsAggregator(ApplicationMetricsService service) {
+		this.service = service;
 	}
 
 	@StreamListener(Sink.INPUT)
 	public void receive(ApplicationMetrics metrics) {
-		this.rawCache.put(metrics.getName(), metrics);
+		this.service.add(metrics);
 	}
 
 

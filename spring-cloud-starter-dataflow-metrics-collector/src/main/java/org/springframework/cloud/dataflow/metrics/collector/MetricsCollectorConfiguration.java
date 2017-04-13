@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.metrics.collector;
 
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -24,6 +25,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.RootEndpoint;
+import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
@@ -51,28 +53,22 @@ public class MetricsCollectorConfiguration {
 		return new MetricJsonSerializer();
 	}
 
-	/**
-	 * Provides the underlying storage for received messages. Eviction can be controlled via
-	 * property spring.cloud.dataflow.metrics.collector.evictionTimeout
-	 *
-	 * @return A {@link Cache} with configured eviction policy
-	 * @throws Exception
-	 */
+
 	@Bean
-	public Cache<String, ApplicationMetrics> rawCache() throws Exception{
-		return Caffeine.<String,ApplicationMetrics>newBuilder()
+	public ApplicationMetricsService applicationMetricsService() throws Exception{
+		return new ApplicationMetricsService(Caffeine.<String,ApplicationMetrics>newBuilder()
 				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS)
-				.build();
+				.build());
 	}
 
 	@Bean
-	public MetricsAggregator metricsAggregator(Cache<String,ApplicationMetrics> rawCache){
-		return new MetricsAggregator(rawCache);
+	public MetricsAggregator metricsAggregator(ApplicationMetricsService applicationMetricsService){
+		return new MetricsAggregator(applicationMetricsService);
 	}
 
 	@Bean
-	public MetricsCollectorEndpoint metricsCollectorEndpoint(Cache<String,ApplicationMetrics> rawCache){
-		return new MetricsCollectorEndpoint(rawCache);
+	public MetricsCollectorEndpoint metricsCollectorEndpoint(ApplicationMetricsService applicationMetricsService){
+		return new MetricsCollectorEndpoint(applicationMetricsService);
 	}
 
 	@Bean

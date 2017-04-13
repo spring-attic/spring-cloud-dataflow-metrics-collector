@@ -52,14 +52,6 @@ public class Application {
 		this.instances = instances;
 	}
 
-	public Double getIncomingRate(){
-		return getInstances().stream().mapToDouble(Instance::getIncomingRate).sum();
-	}
-
-	public Double getOutgoingRate(){
-		return getInstances().stream().mapToDouble(Instance::getOutgoingRate).sum();
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
