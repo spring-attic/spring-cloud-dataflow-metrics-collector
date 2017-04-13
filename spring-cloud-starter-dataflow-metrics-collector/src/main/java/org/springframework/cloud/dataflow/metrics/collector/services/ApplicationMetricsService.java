@@ -2,8 +2,10 @@ package org.springframework.cloud.dataflow.metrics.collector.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -140,7 +142,13 @@ public class ApplicationMetricsService {
 			instance.setIndex(instanceIndex);
 		}
 
-		instance.setMetrics(applicationMetrics.getMetrics());
+		List<Metric<?>> instanceMetrics = new ArrayList<>(applicationMetrics.getMetrics().size());
+		applicationMetrics.getMetrics().stream().forEach(metric -> {
+			Metric copy = new Metric(metric.getName(),metric.getValue(),metric.getTimestamp());
+			instanceMetrics.add(copy);
+		});
+		instance.setMetrics(instanceMetrics);
+
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
 		instance.getMetrics().addAll(computeRate(applicationMetricsList));
