@@ -83,7 +83,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals(app.getName(),instance.getKey());
 		Assert.assertEquals("foo", instance.getGuid());
-		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.rate")).findFirst().get();
+		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.mean")).findFirst().get();
 		Assert.assertEquals(0, YANUtils.toDouble(computed.getValue()).doubleValue(),0.0);
 	}
 
@@ -120,7 +120,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals("http", application.getName());
 		instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
-		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.rate")).findFirst().get();
+		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.mean")).findFirst().get();
 		Assert.assertEquals(20.0, YANUtils.toDouble(computed.getValue()).doubleValue(),0.0);
 	}
 
