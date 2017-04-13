@@ -36,7 +36,7 @@ public class Instance {
 
 	private Map<String,Object> properties;
 
-	private Collection<Metric<?>> metrics;
+	private Collection<Metric> metrics;
 
 	@JsonCreator
 	public Instance(String guid) {
@@ -77,19 +77,11 @@ public class Instance {
 	}
 
 
-	/**
-	 * An instance of this class computes the delta between two measurements of {@link ApplicationMetrics}.
-	 * @param metrics
-	 */
-	public void refresh(Collection<Metric<?>> metrics){
-
-	}
-
-	public Collection<Metric<?>> getMetrics() {
+	public Collection<Metric> getMetrics() {
 		return metrics;
 	}
 
-	public void setMetrics(Collection<Metric<?>> metrics) {
+	public void setMetrics(Collection<Metric> metrics) {
 		this.metrics = metrics;
 	}
 

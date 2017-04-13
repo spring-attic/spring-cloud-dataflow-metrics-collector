@@ -39,7 +39,8 @@ public class ApplicationMetricsService {
 	}
 
 	/**
-	 * Appends an {@link ApplicationMetrics} to the underlying storage. Each key on the storage holds the last two readings in a LIFO list
+	 * Appends an {@link ApplicationMetrics} to the underlying storage. Each key on the
+	 * storage holds the last two readings in a LIFO list
 	 * @param applicationMetrics
 	 */
 	public void add(ApplicationMetrics applicationMetrics) {
@@ -66,8 +67,10 @@ public class ApplicationMetricsService {
 	}
 
 	/**
-	 * Converts the plain model of {@link ApplicationMetrics} into a hierarchical representation of {@link StreamMetrics}
-	 * @param filter Comma delimited list of stream names to be filtered on. If null or empty all streams are returned
+	 * Converts the plain model of {@link ApplicationMetrics} into a hierarchical
+	 * representation of {@link StreamMetrics}
+	 * @param filter Comma delimited list of stream names to be filtered on. If null or
+	 * empty all streams are returned
 	 * @return A collection of filtered {@link StreamMetrics}
 	 */
 	public Collection<StreamMetrics> toStreamMetrics(String filter) {
@@ -141,6 +144,7 @@ public class ApplicationMetricsService {
 		}
 
 		instance.setMetrics(applicationMetrics.getMetrics());
+
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
 		instance.getMetrics().addAll(computeRate(applicationMetricsList));
@@ -174,7 +178,7 @@ public class ApplicationMetricsService {
 		return result;
 	}
 
-	private Double delta(Metric<?> current, Metric<?> previous) {
+	private Double delta(Metric current, Metric previous) {
 		if (previous == null) {
 			return 0.0;
 		}
@@ -184,9 +188,9 @@ public class ApplicationMetricsService {
 		}
 	}
 
-	private Metric<?> findMetric(Collection<Metric<?>> metrics, String name) {
+	private Metric<?> findMetric(Collection<Metric> metrics, String name) {
 		Metric<?> result = null;
-		Optional<Metric<?>> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
+		Optional<Metric> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
 		if (optinal.isPresent()) {
 			result = optinal.get();
 		}
