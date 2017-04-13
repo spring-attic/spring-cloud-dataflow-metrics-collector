@@ -2,10 +2,9 @@ package org.springframework.cloud.dataflow.metrics.collector.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -41,7 +40,8 @@ public class ApplicationMetricsService {
 	}
 
 	/**
-	 * Appends an {@link ApplicationMetrics} to the underlying storage. Each key on the storage holds the last two readings in a LIFO list
+	 * Appends an {@link ApplicationMetrics} to the underlying storage. Each key on the
+	 * storage holds the last two readings in a LIFO list
 	 * @param applicationMetrics
 	 */
 	public void add(ApplicationMetrics applicationMetrics) {
@@ -68,8 +68,10 @@ public class ApplicationMetricsService {
 	}
 
 	/**
-	 * Converts the plain model of {@link ApplicationMetrics} into a hierarchical representation of {@link StreamMetrics}
-	 * @param filter Comma delimited list of stream names to be filtered on. If null or empty all streams are returned
+	 * Converts the plain model of {@link ApplicationMetrics} into a hierarchical
+	 * representation of {@link StreamMetrics}
+	 * @param filter Comma delimited list of stream names to be filtered on. If null or
+	 * empty all streams are returned
 	 * @return A collection of filtered {@link StreamMetrics}
 	 */
 	public Collection<StreamMetrics> toStreamMetrics(String filter) {
@@ -142,12 +144,9 @@ public class ApplicationMetricsService {
 			instance.setIndex(instanceIndex);
 		}
 
-		List<Metric<?>> instanceMetrics = new ArrayList<>(applicationMetrics.getMetrics().size());
-		applicationMetrics.getMetrics().stream().forEach(metric -> {
-			Metric copy = new Metric(metric.getName(),metric.getValue(),metric.getTimestamp());
-			instanceMetrics.add(copy);
-		});
-		instance.setMetrics(instanceMetrics);
+		instance.setMetrics(applicationMetrics.getMetrics().stream().map(metric -> {
+			return new Metric(metric.getName(), metric.getValue(), metric.getTimestamp());
+		}).collect(Collectors.toList()));
 
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
