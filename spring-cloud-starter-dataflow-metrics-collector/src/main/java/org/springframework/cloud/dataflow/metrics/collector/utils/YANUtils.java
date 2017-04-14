@@ -29,21 +29,6 @@ public class YANUtils {
 		return targetClass.isInstance(candidate) ? Optional.of(targetClass.cast(candidate)) : Optional.empty();
 	}
 
-	public static Double toDouble(Object value){
-		Double result = 0.0;
-
-		if(value == null){
-			return result;
-		}
-		String stringVal = value.toString();
-		try{
-			result = Double.valueOf(stringVal);
-		}catch (NumberFormatException e){
-		}
-
-		return result;
-	}
-
 	public static Integer toInteger(Object value){
 		Integer result = 0;
 

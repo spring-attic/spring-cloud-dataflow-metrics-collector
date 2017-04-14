@@ -36,7 +36,7 @@ public class Instance {
 
 	private Map<String,Object> properties;
 
-	private Collection<Metric> metrics;
+	private Collection<Metric<Double>> metrics;
 
 	@JsonCreator
 	public Instance(String guid) {
@@ -77,11 +77,11 @@ public class Instance {
 	}
 
 
-	public Collection<Metric> getMetrics() {
+	public Collection<Metric<Double>> getMetrics() {
 		return metrics;
 	}
 
-	public void setMetrics(Collection<Metric> metrics) {
+	public void setMetrics(Collection<Metric<Double>> metrics) {
 		this.metrics = metrics;
 	}
 

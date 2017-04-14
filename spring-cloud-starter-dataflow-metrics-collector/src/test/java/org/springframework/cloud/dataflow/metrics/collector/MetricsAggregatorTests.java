@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.metrics.collector;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,7 +68,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 	@Test
 	public void includeOneMetric() throws Exception {
 		Long now = System.currentTimeMillis();
-		Metric<Integer> inputSendCount = new Metric<Integer>("integration.channel.input.sendCount",10, new Date(now));
+		Metric<Double> inputSendCount = new Metric<Double>("integration.channel.input.sendCount",10.0, new Date(now));
 		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo",0);
 		app.getMetrics().add(inputSendCount);
 		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
@@ -83,14 +85,14 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals(app.getName(),instance.getKey());
 		Assert.assertEquals("foo", instance.getGuid());
-		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.mean")).findFirst().get();
-		Assert.assertEquals(0, YANUtils.toDouble(computed.getValue()).doubleValue(),0.0);
+		Metric<Double> computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.mean")).findFirst().get();
+		Assert.assertEquals(0, computed.getValue(),0.0);
 	}
 
 	@Test
 	public void incrementMetric() throws Exception {
 		Long now = System.currentTimeMillis();
-		Metric<Integer> inputSendCount = new Metric<Integer>("integration.channel.input.sendCount",10, new Date(now));
+		Metric<Double> inputSendCount = new Metric<Double>("integration.channel.input.sendCount",10.0, new Date(now));
 		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
 		app.getMetrics().add(inputSendCount);
 		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
@@ -108,7 +110,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Instance instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
 
-		Metric<Integer> inputSendCount2 = new Metric<Integer>("integration.channel.input.sendCount",110, new Date(now+5000));
+		Metric<Double> inputSendCount2 = new Metric<Double>("integration.channel.input.sendCount",110.0, new Date(now+5000));
 		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "foo", 0);
 		app2.getMetrics().add(inputSendCount2);
 		aggregator.receive(app2);
@@ -120,8 +122,8 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals("http", application.getName());
 		instance = application.getInstances().get(0);
 		Assert.assertEquals("foo", instance.getGuid());
-		Metric computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.mean")).findFirst().get();
-		Assert.assertEquals(20.0, YANUtils.toDouble(computed.getValue()).doubleValue(),0.0);
+		Metric<Double> computed = instance.getMetrics().stream().filter(metric -> metric.getName().equals("integration.channel.input.send.mean")).findFirst().get();
+		Assert.assertEquals(20.0, computed.getValue(),0.0);
 	}
 
 	@Test
@@ -263,12 +265,48 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals(0, endpoint.fetchMetrics("httpIngest;woodchuck").getBody().getContent().size());
 	}
 
+	@Test
+	public void aggregateMetricsTest() throws Exception {
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
+
+		Long now = System.currentTimeMillis();
+		Metric<Double> inputSendCount = new Metric<Double>("integration.channel.input.sendCount",0.0, new Date(now));
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		app.getMetrics().add(inputSendCount);
+
+		ApplicationMetrics app2 = createMetrics("httpIngest", "http", "bar", 1);
+		app2.getMetrics().add(inputSendCount);
+
+		aggregator.receive(app);
+		aggregator.receive(app2);
+
+		Metric<Double> inputSendCount2 = new Metric<Double>("integration.channel.input.sendCount",10.0, new Date(now+5000));
+
+		ApplicationMetrics app3 = createMetrics("httpIngest", "http", "foo", 0);
+		app3.getMetrics().add(inputSendCount2);
+
+		ApplicationMetrics app4 = createMetrics("httpIngest", "http", "bar", 1);
+		app4.getMetrics().add(inputSendCount2);
+
+
+
+		aggregator.receive(app3);
+		aggregator.receive(app4);
+
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Metric<Double> aggregate = streamMetrics.getApplications().get(0).getAggregateMetrics().iterator().next();
+		Assert.assertEquals(4.0,aggregate.getValue(),0.0);
+	}
+
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index){
-		return createMetrics(streamName, applicationName, appGuid, index, new LinkedList<Metric>());
+		return createMetrics(streamName, applicationName, appGuid, index, new LinkedList<Metric<Double>>());
 	}
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index,
-			List<Metric> metrics) {
+			List<Metric<Double>> metrics) {
 
 		ApplicationMetrics applicationMetrics = new ApplicationMetrics(
 				streamName + "." + applicationName + "." + appGuid, new LinkedList<>());

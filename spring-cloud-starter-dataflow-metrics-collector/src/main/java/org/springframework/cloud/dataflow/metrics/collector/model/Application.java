@@ -16,10 +16,18 @@
 
 package org.springframework.cloud.dataflow.metrics.collector.model;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import org.springframework.boot.actuate.metrics.Metric;
+import org.springframework.cloud.dataflow.metrics.collector.utils.YANUtils;
 
 /**
  * @author Vinicius Carvalho
@@ -30,6 +38,7 @@ public class Application {
 
 	private List<Instance> instances = new LinkedList<>();
 
+	private Collection<Metric<Double>> aggregateMetrics = new LinkedList<>();
 
 	@JsonCreator
 	public Application(String name) {
@@ -50,6 +59,17 @@ public class Application {
 
 	public void setInstances(List<Instance> instances) {
 		this.instances = instances;
+	}
+
+	public Collection<Metric<Double>> getAggregateMetrics() {
+		return getInstances().stream()
+				.map(instance -> instance.getMetrics())
+				.flatMap(metrics -> metrics.stream())
+				.filter(metric -> metric.getName().matches("integration\\.channel\\.(\\w*)\\.send.mean"))
+				.collect(Collectors.groupingBy(Metric::getName,Collectors.summingDouble(Metric::getValue)))
+				.entrySet().stream()
+				.map(entry -> new Metric<Double>(entry.getKey(),entry.getValue(),new Date()))
+				.collect(Collectors.toList());
 	}
 
 	@Override
