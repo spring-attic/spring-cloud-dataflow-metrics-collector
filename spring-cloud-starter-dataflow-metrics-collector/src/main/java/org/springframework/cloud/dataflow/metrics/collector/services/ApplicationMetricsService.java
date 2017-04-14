@@ -166,7 +166,7 @@ public class ApplicationMetricsService {
 	private List<Metric<Double>> computeRate(List<ApplicationMetrics> applicationMetricsList) {
 		List<Metric<Double>> result = new ArrayList<>();
 		ApplicationMetrics applicationMetrics = applicationMetricsList.get(0);
-		for (Metric<?> metric : applicationMetrics.getMetrics()) {
+		for (Metric<Double> metric : applicationMetrics.getMetrics()) {
 			Matcher matcher = pattern.matcher(metric.getName());
 			if (matcher.matches()) {
 				Metric previous = applicationMetricsList.size() < 2 ? null
@@ -178,19 +178,19 @@ public class ApplicationMetricsService {
 		return result;
 	}
 
-	private Double delta(Metric current, Metric previous) {
+	private Double delta(Metric<Double> current, Metric<Double> previous) {
 		if (previous == null) {
 			return 0.0;
 		}
 		else {
-			return ((YANUtils.toDouble(current.getValue()) - YANUtils.toDouble(previous.getValue()))
-					/ (current.getTimestamp().getTime() - previous.getTimestamp().getTime())) * 1000;
+			return (current.getValue() - previous.getValue())
+					/ (current.getTimestamp().getTime() - previous.getTimestamp().getTime()) * 1000;
 		}
 	}
 
-	private Metric<?> findMetric(Collection<Metric> metrics, String name) {
-		Metric<?> result = null;
-		Optional<Metric> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
+	private Metric<Double> findMetric(Collection<Metric<Double>> metrics, String name) {
+		Metric<Double> result = null;
+		Optional<Metric<Double>> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
 		if (optinal.isPresent()) {
 			result = optinal.get();
 		}
