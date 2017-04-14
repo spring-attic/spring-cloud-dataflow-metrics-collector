@@ -2,7 +2,6 @@ package org.springframework.cloud.dataflow.metrics.collector.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -144,9 +143,7 @@ public class ApplicationMetricsService {
 			instance.setIndex(instanceIndex);
 		}
 
-		instance.setMetrics(applicationMetrics.getMetrics().stream().map(metric -> {
-			return new Metric(metric.getName(), metric.getValue(), metric.getTimestamp());
-		}).collect(Collectors.toList()));
+		instance.setMetrics(applicationMetrics.getMetrics());
 
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
@@ -181,7 +178,7 @@ public class ApplicationMetricsService {
 		return result;
 	}
 
-	private Double delta(Metric<?> current, Metric<?> previous) {
+	private Double delta(Metric current, Metric previous) {
 		if (previous == null) {
 			return 0.0;
 		}
@@ -191,9 +188,9 @@ public class ApplicationMetricsService {
 		}
 	}
 
-	private Metric<?> findMetric(Collection<Metric<?>> metrics, String name) {
+	private Metric<?> findMetric(Collection<Metric> metrics, String name) {
 		Metric<?> result = null;
-		Optional<Metric<?>> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
+		Optional<Metric> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
 		if (optinal.isPresent()) {
 			result = optinal.get();
 		}

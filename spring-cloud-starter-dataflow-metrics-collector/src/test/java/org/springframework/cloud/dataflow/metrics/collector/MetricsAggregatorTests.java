@@ -263,25 +263,12 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals(0, endpoint.fetchMetrics("httpIngest;woodchuck").getBody().getContent().size());
 	}
 
-	@Test
-	public void testRegex() throws Exception {
-		Pattern pattern = Pattern.compile("integration\\.channel\\.(\\w*)\\.sendCount");
-
-		String test1 = "integration.channel.applicationMetrics.sendCount";
-		String test2 = "integration.channel.input.sendCount";
-		Matcher matcher = pattern.matcher(test1);
-		if(matcher.matches()){
-			String channel = matcher.group(1);
-		}
-
-	}
-
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index){
-		return createMetrics(streamName, applicationName, appGuid, index, new LinkedList<Metric<?>>());
+		return createMetrics(streamName, applicationName, appGuid, index, new LinkedList<Metric>());
 	}
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index,
-			List<Metric<?>> metrics) {
+			List<Metric> metrics) {
 
 		ApplicationMetrics applicationMetrics = new ApplicationMetrics(
 				streamName + "." + applicationName + "." + appGuid, new LinkedList<>());

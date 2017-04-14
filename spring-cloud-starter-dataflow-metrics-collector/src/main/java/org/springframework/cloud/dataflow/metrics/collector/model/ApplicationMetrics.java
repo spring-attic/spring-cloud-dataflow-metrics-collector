@@ -45,13 +45,13 @@ public class ApplicationMetrics {
 
 	private String name;
 
-	private Collection<Metric<?>> metrics;
+	private Collection<Metric> metrics;
 
 	private Map<String, Object> properties;
 
 	@JsonCreator
 	public ApplicationMetrics(@JsonProperty("name") String name,
-			@JsonProperty("metrics") Collection<Metric<?>> metrics) {
+			@JsonProperty("metrics") Collection<Metric> metrics) {
 		this.name = name;
 		this.metrics = metrics;
 		this.createdTime = new Date();
@@ -65,11 +65,11 @@ public class ApplicationMetrics {
 		this.name = name;
 	}
 
-	public Collection<Metric<?>> getMetrics() {
+	public Collection<Metric> getMetrics() {
 		return metrics;
 	}
 
-	public void setMetrics(Collection<Metric<?>> metrics) {
+	public void setMetrics(Collection<Metric> metrics) {
 		this.metrics = metrics;
 	}
 
