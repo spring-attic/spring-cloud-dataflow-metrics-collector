@@ -65,7 +65,7 @@ public class Application {
 		return getInstances().stream()
 				.map(instance -> instance.getMetrics())
 				.flatMap(metrics -> metrics.stream())
-				.filter(metric -> metric.getName().matches("integration\\.channel\\.(\\w*)\\.send.mean"))
+				.filter(metric -> metric.getName().matches("integration\\.channel\\.(\\w*)\\.send\\.mean"))
 				.collect(Collectors.groupingBy(Metric::getName,Collectors.summingDouble(Metric::getValue)))
 				.entrySet().stream()
 				.map(entry -> new Metric<Double>(entry.getKey(),entry.getValue(),new Date()))
