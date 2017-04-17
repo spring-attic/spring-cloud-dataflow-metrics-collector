@@ -143,7 +143,7 @@ public class ApplicationMetricsService {
 			instance.setIndex(instanceIndex);
 		}
 
-		instance.setMetrics(applicationMetrics.getMetrics());
+		instance.setMetrics(applicationMetrics.getMetrics().stream().filter(metric -> !metric.getName().matches("integration\\.channel\\.(\\w*)\\.send\\.mean")).collect(Collectors.toList()));
 
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
