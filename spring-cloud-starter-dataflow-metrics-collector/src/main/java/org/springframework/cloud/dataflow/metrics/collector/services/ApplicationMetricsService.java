@@ -143,7 +143,7 @@ public class ApplicationMetricsService {
 			instance.setIndex(instanceIndex);
 		}
 
-		instance.setMetrics(applicationMetrics.getMetrics());
+		instance.setMetrics(applicationMetrics.getMetrics().stream().filter(metric -> !pattern.matcher(metric.getName()).matches()).collect(Collectors.toList()));
 
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
