@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.RootEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
+import org.springframework.cloud.dataflow.metrics.collector.support.CaffeineHealthIndicator;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
@@ -55,10 +56,16 @@ public class MetricsCollectorConfiguration {
 
 
 	@Bean
-	public ApplicationMetricsService applicationMetricsService() throws Exception{
-		return new ApplicationMetricsService(Caffeine.<String,ApplicationMetrics>newBuilder()
+	public Cache<String,LinkedList<ApplicationMetrics>> metricsStorage(){
+		return Caffeine.<String,ApplicationMetrics>newBuilder()
 				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS)
-				.build());
+				.recordStats()
+				.build();
+	}
+
+	@Bean
+	public ApplicationMetricsService applicationMetricsService(Cache<String,LinkedList<ApplicationMetrics>> metricsStorage) throws Exception{
+		return new ApplicationMetricsService(metricsStorage);
 	}
 
 	@Bean
@@ -74,5 +81,10 @@ public class MetricsCollectorConfiguration {
 	@Bean
 	public RootEndpoint rootEndpoint(EntityLinks entityLinks){
 		return new RootEndpoint(entityLinks);
+	}
+
+	@Bean
+	public CaffeineHealthIndicator caffeineHealthIndicator(Cache<String,LinkedList<ApplicationMetrics>> metricsStorage){
+		return new CaffeineHealthIndicator(metricsStorage);
 	}
 }
