@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -13,6 +14,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.cloud.dataflow.metrics.collector.model.Application;
@@ -38,6 +41,8 @@ public class ApplicationMetricsService {
 		this.storage = storage;
 	}
 
+	private Logger logger = LoggerFactory.getLogger(ApplicationMetricsService.class);
+
 	/**
 	 * Appends an {@link ApplicationMetrics} to the underlying storage. Each key on the
 	 * storage holds the last two readings in a LIFO list
@@ -51,15 +56,14 @@ public class ApplicationMetricsService {
 			if (values == null) {
 				values = new LinkedList<>();
 				values.addFirst(applicationMetrics);
-				storage.put(applicationMetrics.getName(), values);
 			}
 			else {
 				values.addFirst(applicationMetrics);
 				if (values.size() > 2) {
 					values.removeLast();
 				}
-
 			}
+			storage.put(applicationMetrics.getName(), values);
 		}
 		finally {
 			this.rwLock.unlock();
@@ -94,8 +98,8 @@ public class ApplicationMetricsService {
 						.asMap().values().stream().filter(applicationMetrics -> applicationMetrics.getFirst()
 								.getProperties().get(ApplicationMetrics.STREAM_NAME).equals(streamName))
 						.collect(Collectors.toList());
-				for (List<ApplicationMetrics> applicationMetrics : filteredList) {
-					streamMetrics = convert(applicationMetrics, streamMetrics);
+				for (List<ApplicationMetrics> applicationMetricsList : filteredList) {
+					streamMetrics = convert(applicationMetricsList, streamMetrics);
 				}
 				if (streamMetrics != null) {
 					entries.add(streamMetrics);
@@ -107,6 +111,8 @@ public class ApplicationMetricsService {
 		}
 		return entries;
 	}
+
+
 
 	/**
 	 * Converts a denormalized view of each application instance metric
