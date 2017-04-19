@@ -322,6 +322,7 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 
 		aggregator.receive(app2);
 		streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+		Assert.assertNotNull(streamMetrics);
 	}
 
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index){
