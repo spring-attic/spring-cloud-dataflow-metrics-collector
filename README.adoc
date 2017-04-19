@@ -64,16 +64,20 @@ Internally the collector maintains a cache of the metrics it receives. The defau
 The default for the collector is to evict any metric reading that was not updated over the past 30 seconds.
 You can however change this value by setting the property `spring.cloud.dataflow.metrics.collector.evictionTimeout`
 
+== Security
+
+The collector will have security enabled by default, make sure you start it with a proper username/password using `--security.user.name` and `--security.user.password`
+
 == E2E Cheat sheet
 
 The following is just a sample of commands that one can use to get the collector up and running and see some metrics on the dataflow UI.
 
 ```
 Collector:
-java -jar target/metrics-collector-rabbit-1.0.0.BUILD-SNAPSHOT.jar --security.basic.enabled=false --management.security.enabled=false
+java -jar target/metrics-collector-rabbit-1.0.0.BUILD-SNAPSHOT.jar --security.user.name=spring --security.user.password=cloud
 
 Server:
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080 --spring.cloud.dataflow.metrics.collector.username=spring --spring.cloud.dataflow.metrics.collector.password=cloud
 
 Register Apps:
 app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
