@@ -34,7 +34,7 @@ public class Instance {
 
 	private String key;
 
-	private Map<String,Object> properties;
+	private Map<String, Object> properties;
 
 	private Collection<Metric<Double>> metrics;
 
@@ -67,7 +67,6 @@ public class Instance {
 		this.properties = properties;
 	}
 
-
 	public String getKey() {
 		return key;
 	}
@@ -75,7 +74,6 @@ public class Instance {
 	public void setKey(String key) {
 		this.key = key;
 	}
-
 
 	public Collection<Metric<Double>> getMetrics() {
 		return metrics;
@@ -87,8 +85,10 @@ public class Instance {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
 		Instance instance = (Instance) o;
 

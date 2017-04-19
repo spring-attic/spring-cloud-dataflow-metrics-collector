@@ -1,0 +1,78 @@
+== Spring cloud dataflow metrics collector
+_"There's no knowledge that is not power" - Ralph Waldo Emerson_
+
+The metrics collector is a companion application to the http://cloud.spring.io/spring-cloud-dataflow/[Spring Cloud Dataflow] server.
+
+It collects metrics emitted by http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] apps, and groups them together around the stream definition that dataflow used to deploy them.
+
+All of the OOB http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud App Starters] currently have the metrics emitter module already bundled on it.
+You can enable metric emission by setting a flag explained http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html#_metrics_emitter[here]
+
+== Building
+
+Because apps could use different binder implementations (RabbitMQ, Kafka, JMS), the collector is build using the same support provided by the App Starters.
+
+To build you need first generate the source code for the apps of each binder:
+
+[source,bash]
+----
+./mvnw clean install -PgenerateApps
+----
+
+This will generate an `apps` folder like the one below:
+
+```
+apps
+├── metrics-collector-kafka-09
+├── metrics-collector-kafka-10
+├── metrics-collector-rabbit
+└── pom.xml
+```
+
+So, let's assume your environment have apps deployed using RabbitMQ, cd into the `metrics-collector-rabbit` folder and run
+
+[source,bash]
+----
+./mvnw package
+----
+
+You should find the *uber jar* of the collector inside your `target` folder.
+
+== Running
+
+The collector is an *uber jar* following the same principles of any Spring Cloud Stream app.
+So it means, that you need to provide connection information to the broker that you are using.
+Just follow the instructions on http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html[Spring Cloud Stream] docs on how to configure each binder.
+If you are deploying on a platform such as cloudfoundry, binding a rabbitmq service to it, should work as well.
+
+=== Configuring
+
+By default, the collector will create an anonymous consumer to an exchange called `metrics`, assuming that your apps have been deployed configuring `spring.cloud.stream.bindings.applicationMetrics.destination=metrics`.
+If your applications are emitting metrics to a different destination change this behavior by setting `spring.cloud.stream.bindings.input.destination=<DESTINATION_NAME>`
+
+=== Controlling eviction
+
+Internally the collector maintains a cache of the metrics it receives. The default for metric emission is every 5 seconds, but can be tuned on the application by using Spring Boot's metrics exporter scheduling control, please refer to the docs http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html#_metrics_emitter[here] to configure your applications.
+
+The default for the collector is to evict any metric reading that was not updated over the past 30 seconds.
+You can however change this value by setting the property `spring.cloud.dataflow.metrics.collector.evictionTimeout`
+
+== E2E Cheat sheet
+
+The following is just a sample of commands that one can use to get the collector up and running and see some metrics on the dataflow UI.
+
+```
+Collector:
+java -jar target/metrics-collector-rabbit-1.0.0.BUILD-SNAPSHOT.jar --security.basic.enabled=false --management.security.enabled=false
+
+Server:
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080/collector/metrics/streams
+
+Register Apps:
+app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
+
+
+Stream:
+stream create --name foostream --definition "time | log"
+stream deploy --name foostream --properties "deployer.*.count=3,app.*.security.basic.enabled=false,app.*.management.security.enabled=false,app.*.spring.cloud.stream.bindings.applicationMetrics.destination=metrics"
+```

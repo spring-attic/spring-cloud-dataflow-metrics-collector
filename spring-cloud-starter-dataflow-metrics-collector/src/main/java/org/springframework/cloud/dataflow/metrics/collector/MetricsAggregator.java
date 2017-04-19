@@ -16,14 +16,9 @@
 
 package org.springframework.cloud.dataflow.metrics.collector;
 
-
-import java.util.LinkedList;
-
-import com.github.benmanes.caffeine.cache.Cache;
-
+import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +43,5 @@ public class MetricsAggregator {
 	public void receive(ApplicationMetrics metrics) {
 		this.service.add(metrics);
 	}
-
 
 }
