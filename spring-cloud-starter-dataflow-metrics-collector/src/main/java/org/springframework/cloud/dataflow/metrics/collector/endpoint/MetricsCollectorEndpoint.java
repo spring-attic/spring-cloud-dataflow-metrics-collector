@@ -40,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StreamMetrics.class)
 public class MetricsCollectorEndpoint {
 
-
 	private final Pattern pattern = Pattern.compile("integration\\.channel\\.(\\w*)\\.sendCount");
 
 	private ApplicationMetricsService service;
@@ -63,6 +62,5 @@ public class MetricsCollectorEndpoint {
 
 		return new ResponseEntity<PagedResources<StreamMetrics>>(pagedResources, HttpStatus.OK);
 	}
-
 
 }

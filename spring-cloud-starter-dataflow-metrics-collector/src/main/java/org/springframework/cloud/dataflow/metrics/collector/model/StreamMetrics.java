@@ -21,20 +21,18 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import org.springframework.hateoas.ResourceSupport;
-
 /**
  * @author Vinicius Carvalho
  */
-public class StreamMetrics{
+public class StreamMetrics {
+	private String name;
+
+	private List<Application> applications = new LinkedList<>();
+
 	@JsonCreator
 	public StreamMetrics(String name) {
 		this.name = name;
 	}
-
-	private String name;
-
-	private List<Application> applications = new LinkedList<>();
 
 	public String getName() {
 		return name;
