@@ -29,10 +29,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MetricsAggregator {
 
-	public static final String OUTPUT_METRIC_NAME = "integration.channel.output.sendRate.mean";
-
-	public static final String INPUT_METRIC_NAME = "integration.channel.input.sendRate.mean";
-
 	private ApplicationMetricsService service;
 
 	public MetricsAggregator(ApplicationMetricsService service) {
@@ -41,7 +37,11 @@ public class MetricsAggregator {
 
 	@StreamListener(Sink.INPUT)
 	public void receive(ApplicationMetrics metrics) {
-		this.service.add(metrics);
+		if (metrics.getProperties().get(ApplicationMetrics.APPLICATION_GUID) != null
+				&& metrics.getProperties().get(ApplicationMetrics.APPLICATION_NAME) != null
+				&& metrics.getProperties().get(ApplicationMetrics.STREAM_NAME) != null) {
+			this.service.add(metrics);
+		}
 	}
 
 }

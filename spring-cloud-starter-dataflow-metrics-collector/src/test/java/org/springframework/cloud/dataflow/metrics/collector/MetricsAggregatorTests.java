@@ -302,6 +302,28 @@ public class MetricsAggregatorTests extends BaseCacheTests {
 		Assert.assertEquals(4.0,aggregate.getValue(),0.0);
 	}
 
+	@Test
+	public void poisonMetricTest() throws Exception {
+		Cache<String, LinkedList<ApplicationMetrics>> rawCache = Caffeine.newBuilder().build();
+		ApplicationMetricsService service = new ApplicationMetricsService(rawCache);
+		MetricsAggregator aggregator = new MetricsAggregator(service);
+		MetricsCollectorEndpoint endpoint = new MetricsCollectorEndpoint(service);
+
+		ApplicationMetrics app = createMetrics("httpIngest", "http", "foo", 0);
+		aggregator.receive(app);
+		StreamMetrics streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+
+		Application application = streamMetrics.getApplications().get(0);
+		Assert.assertNotNull(streamMetrics);
+		Assert.assertEquals("http", application.getName());
+
+		ApplicationMetrics app2= createMetrics("httpIngest", "log", "foo", 0);
+		app2.setProperties(new HashMap<>());
+
+		aggregator.receive(app2);
+		streamMetrics = endpoint.fetchMetrics("").getBody().iterator().next();
+	}
+
 	private ApplicationMetrics createMetrics(String streamName, String applicationName, String appGuid, Integer index){
 		return createMetrics(streamName, applicationName, appGuid, index, new LinkedList<Metric<Double>>());
 	}
