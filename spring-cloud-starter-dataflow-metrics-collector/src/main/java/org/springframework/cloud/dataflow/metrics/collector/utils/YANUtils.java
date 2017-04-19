@@ -18,8 +18,6 @@ package org.springframework.cloud.dataflow.metrics.collector.utils;
 
 import java.util.Optional;
 
-import org.springframework.util.StringUtils;
-
 /**
  * Yet Another Utils class
  * @author Vinicius Carvalho
@@ -29,18 +27,19 @@ public class YANUtils {
 		return targetClass.isInstance(candidate) ? Optional.of(targetClass.cast(candidate)) : Optional.empty();
 	}
 
-	public static Integer toInteger(Object value){
+	public static Integer toInteger(Object value) {
 		Integer result = 0;
 
-		if(value == null){
+		if (value == null) {
 			return result;
 		}
 		String stringVal = value.toString();
-		try{
+		try {
 			result = Integer.valueOf(stringVal);
-		}catch (NumberFormatException e){
 		}
-		
+		catch (NumberFormatException e) {
+		}
+
 		return result;
 	}
 }

@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.boot.actuate.metrics.Metric;
 
-
 /**
  * @author Vinicius Carvalho
  */
@@ -87,8 +86,10 @@ public class ApplicationMetrics {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
 		ApplicationMetrics that = (ApplicationMetrics) o;
 

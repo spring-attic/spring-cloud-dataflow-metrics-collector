@@ -24,18 +24,17 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.RootEndpoint;
+import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
 import org.springframework.cloud.dataflow.metrics.collector.support.CaffeineHealthIndicator;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
-import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.support.MetricJsonSerializer;
+import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.EntityLinks;
-
 
 /**
  * @author Mark Pollack
@@ -50,41 +49,40 @@ public class MetricsCollectorConfiguration {
 	private MetricCollectorProperties properties;
 
 	@Bean
-	public MetricJsonSerializer jsonSerializer(){
+	public MetricJsonSerializer jsonSerializer() {
 		return new MetricJsonSerializer();
 	}
 
-
 	@Bean
-	public Cache<String,LinkedList<ApplicationMetrics>> metricsStorage(){
-		return Caffeine.<String,ApplicationMetrics>newBuilder()
-				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS)
-				.recordStats()
-				.build();
+	public Cache<String, LinkedList<ApplicationMetrics>> metricsStorage() {
+		return Caffeine.<String, ApplicationMetrics> newBuilder()
+				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS).recordStats().build();
 	}
 
 	@Bean
-	public ApplicationMetricsService applicationMetricsService(Cache<String,LinkedList<ApplicationMetrics>> metricsStorage) throws Exception{
+	public ApplicationMetricsService applicationMetricsService(
+			Cache<String, LinkedList<ApplicationMetrics>> metricsStorage) throws Exception {
 		return new ApplicationMetricsService(metricsStorage);
 	}
 
 	@Bean
-	public MetricsAggregator metricsAggregator(ApplicationMetricsService applicationMetricsService){
+	public MetricsAggregator metricsAggregator(ApplicationMetricsService applicationMetricsService) {
 		return new MetricsAggregator(applicationMetricsService);
 	}
 
 	@Bean
-	public MetricsCollectorEndpoint metricsCollectorEndpoint(ApplicationMetricsService applicationMetricsService){
+	public MetricsCollectorEndpoint metricsCollectorEndpoint(ApplicationMetricsService applicationMetricsService) {
 		return new MetricsCollectorEndpoint(applicationMetricsService);
 	}
 
 	@Bean
-	public RootEndpoint rootEndpoint(EntityLinks entityLinks){
+	public RootEndpoint rootEndpoint(EntityLinks entityLinks) {
 		return new RootEndpoint(entityLinks);
 	}
 
 	@Bean
-	public CaffeineHealthIndicator caffeineHealthIndicator(Cache<String,LinkedList<ApplicationMetrics>> metricsStorage){
+	public CaffeineHealthIndicator caffeineHealthIndicator(
+			Cache<String, LinkedList<ApplicationMetrics>> metricsStorage) {
 		return new CaffeineHealthIndicator(metricsStorage);
 	}
 }
