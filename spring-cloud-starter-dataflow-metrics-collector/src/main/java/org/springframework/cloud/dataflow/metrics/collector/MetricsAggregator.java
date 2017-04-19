@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.metrics.collector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -31,6 +34,8 @@ public class MetricsAggregator {
 
 	private ApplicationMetricsService service;
 
+	private Logger logger = LoggerFactory.getLogger(MetricsAggregator.class);
+
 	public MetricsAggregator(ApplicationMetricsService service) {
 		this.service = service;
 	}
@@ -41,6 +46,10 @@ public class MetricsAggregator {
 				&& metrics.getProperties().get(ApplicationMetrics.APPLICATION_NAME) != null
 				&& metrics.getProperties().get(ApplicationMetrics.STREAM_NAME) != null) {
 			this.service.add(metrics);
+		}else{
+			if(logger.isDebugEnabled()){
+				logger.debug("Metric : {} is missing key properties and will not be consumed by the collector",metrics.getName());
+			}
 		}
 	}
 
