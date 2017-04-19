@@ -10,7 +10,8 @@ You can enable metric emission by setting a flag explained http://docs.spring.io
 
 == Building
 
-Because apps could use different binder implementations (RabbitMQ, Kafka, JMS), the collector is build using the same support provided by the App Starters.
+Because apps could use different binder implementations (RabbitMQ, Kafka, JMS), the collector is built using the same support provided by the App Starters to
+create an executable uber jar artifact per binder.
 
 To build you need first generate the source code for the apps of each binder:
 
@@ -43,12 +44,18 @@ You should find the *uber jar* of the collector inside your `target` folder.
 The collector is an *uber jar* following the same principles of any Spring Cloud Stream app.
 So it means, that you need to provide connection information to the broker that you are using.
 Just follow the instructions on http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html[Spring Cloud Stream] docs on how to configure each binder.
-If you are deploying on a platform such as cloudfoundry, binding a rabbitmq service to it, should work as well.
+If you are deploying on a platform such as cloudfoundry, you only need to bind a rabbitmq service to the collector.
 
 === Configuring
 
-By default, the collector will create an anonymous consumer to an exchange called `metrics`, assuming that your apps have been deployed configuring `spring.cloud.stream.bindings.applicationMetrics.destination=metrics`.
-If your applications are emitting metrics to a different destination change this behavior by setting `spring.cloud.stream.bindings.input.destination=<DESTINATION_NAME>`
+The default destination that the collector listens to is named `metrics`.  You
+can override this default by setting the property
+`spring.cloud.stream.bindings.input.destination=<DESTINATION_NAME>`
+This should match the destination that Spring Cloud Stream applications
+use to send metrics, which is set using the property
+`spring.cloud.stream.bindings.applicationMetrics.destination=<DESTINATION_NAME>`
+
+Assuming apps have been deployed configuring `spring.cloud.stream.bindings.applicationMetrics.destination=metrics`.  For the RabbitMQ binder, the collector will create an anonymous consumer to an exchange called `metrics`.  For the Kafka binder, the collector creates a Kafka topic named `metrics`.
 
 === Controlling eviction
 
@@ -66,7 +73,7 @@ Collector:
 java -jar target/metrics-collector-rabbit-1.0.0.BUILD-SNAPSHOT.jar --security.basic.enabled=false --management.security.enabled=false
 
 Server:
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080/collector/metrics/streams
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080
 
 Register Apps:
 app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
@@ -74,5 +81,6 @@ app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
 
 Stream:
 stream create --name foostream --definition "time | log"
-stream deploy --name foostream --properties "deployer.*.count=3,app.*.security.basic.enabled=false,app.*.management.security.enabled=false,app.*.spring.cloud.stream.bindings.applicationMetrics.destination=metrics"
+stream deploy --name foostream --properties "deployer.*.count=2,app.*.spring.cloud.stream.bindings.applicationMetrics.destination=metrics"
 ```
+
