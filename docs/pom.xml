@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.3.RELEASE</version>
+		<version>1.5.2.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<artifactId>spring-cloud-dataflow-collector-metrics-docs</artifactId>
 	<name>Spring Cloud Data Flow Metrics Collector Docs</name>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
+	<version>1.0.0.M1</version>
 	<description>Spring Cloud Data Flow Metrics Collector Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
