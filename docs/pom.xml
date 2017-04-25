@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-metrics-collector-build</artifactId>
-		<version>1.0.0.RC1</version>
+		<version>1.0.0.BUILD-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-dataflow-collector-metrics-docs</artifactId>
 	<name>Spring Cloud Data Flow Metrics Collector Docs</name>
-	<version>1.0.0.RC1</version>
+	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<description>Spring Cloud Data Flow Metrics Collector Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
