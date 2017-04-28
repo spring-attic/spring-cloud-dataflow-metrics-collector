@@ -11,11 +11,11 @@
     <parent>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-dataflow-metrics-collector-build</artifactId>
-        <version>1.0.0.BUILD-SNAPSHOT</version>
+        <version>1.0.0.RELEASE</version>
     </parent>
 
     <properties>
-        <scs-app-maven-plugin.version>1.2.5.RC1</scs-app-maven-plugin.version>
+        <scs-app-maven-plugin.version>1.2.5.RELEASE</scs-app-maven-plugin.version>
     </properties>
 
     <dependencies>
