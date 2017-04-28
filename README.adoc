@@ -8,6 +8,26 @@ It collects metrics emitted by http://cloud.spring.io/spring-cloud-stream/[Sprin
 All of the OOB http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud App Starters] currently have the metrics emitter module already bundled on it.
 You can enable metric emission by setting a flag explained http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html#_metrics_emitter[here]
 
+## Downloadable Links for Latest GA Releases for Metrics Collector Uber Jars and Docker Images
+
+[width="40%",frame="topbot",options="header,footer"]
+|======================
+|Uber Jar |Http Link |Docker Hub Link
+|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/1.0.0.RELEASE/metrics-collector-rabbit-1.0.0.RELEASE.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:1.0.0.RELEASE]
+|metrics-collector-kafka-09| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-09/1.0.0.RELEASE/metrics-collector-kafka-09-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-09/tags/ [docker pull metrics-collector-kafka-09:1.0.0.RELEASE]
+|metrics-collector-kafka-10| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-10/1.0.0.RELEASE/metrics-collector-kafka-10-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-10/tags/ [docker pull metrics-collector-kafka-10:1.0.0.RELEASE]
+|======================
+
+## Downloadable Links for Latest Snapshots for Metrics Collector Uber Jars and Docker Images
+
+[width="40%",frame="topbot",options="header,footer"]
+|======================
+|Uber Jar |Http Link |Docker Hub Link
+|metrics-collector-rabbit| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/1.0.1.BUILD-SNAPSHOT/metrics-collector-rabbit-1.0.1.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:1.0.1.BUILD-SNAPSHOT]
+|metrics-collector-kafka-09| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka-09/1.0.1.BUILD-SNAPSHOT/metrics-collector-kafka-09-1.0.1.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-09/tags/ [docker pull metrics-collector-kafka-09:1.0.1.BUILD-SNAPSHOT]
+|metrics-collector-kafka-10| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka-10/1.0.1.BUILD-SNAPSHOT/metrics-collector-kafka-10-1.0.1.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-10/tags/ [docker pull metrics-collector-kafka-10:1.0.1.BUILD-SNAPSHOT]
+|======================
+
 == Building
 
 Because apps could use different binder implementations (RabbitMQ, Kafka, JMS), the collector is built using the same support provided by the App Starters to
