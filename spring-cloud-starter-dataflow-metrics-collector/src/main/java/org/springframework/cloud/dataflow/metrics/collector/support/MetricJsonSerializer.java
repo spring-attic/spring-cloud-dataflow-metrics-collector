@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -104,7 +105,8 @@ public class MetricJsonSerializer {
 		final DecimalFormat decimalFormat;
 
 		public InternalFormatters() {
-			this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			this.dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+			this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 			this.decimalFormat = new DecimalFormat("#.##");
 		}
 
