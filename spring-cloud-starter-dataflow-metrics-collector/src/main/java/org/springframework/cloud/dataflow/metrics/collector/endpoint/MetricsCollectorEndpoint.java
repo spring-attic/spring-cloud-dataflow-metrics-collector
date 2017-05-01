@@ -27,6 +27,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,7 +49,7 @@ public class MetricsCollectorEndpoint {
 		this.service = service;
 	}
 
-	@RequestMapping(produces = MediaTypes.HAL_JSON_VALUE)
+	@RequestMapping(produces = {MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<PagedResources<StreamMetrics>> fetchMetrics(
 			@RequestParam(value = "name", defaultValue = "") String name) {
 
