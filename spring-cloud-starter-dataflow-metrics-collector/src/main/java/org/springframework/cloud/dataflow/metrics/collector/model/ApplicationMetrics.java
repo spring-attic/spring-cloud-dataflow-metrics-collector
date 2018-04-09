@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,15 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.springframework.boot.actuate.metrics.Metric;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Vinicius Carvalho
+ * @author Oleg Zhurakousky
+ * @author Christian Tzolov
  */
-public class ApplicationMetrics {
+@JsonPropertyOrder({ "name", "createdTime", "properties", "metrics" })
+public class ApplicationMetrics<T> {
 
 	public static final String STREAM_NAME = "spring.cloud.dataflow.stream.name";
 	public static final String APPLICATION_NAME = "spring.cloud.dataflow.stream.app.label";
@@ -38,19 +40,25 @@ public class ApplicationMetrics {
 	public static final String APPLICATION_GUID = "spring.cloud.application.guid";
 	public static final String INSTANCE_INDEX = "spring.application.index";
 	public static final String APPLICATION_METRICS_JSON = "application/vnd.spring.cloud.stream.metrics.v1+json";
+	public static final String STREAM_METRICS_VERSION = "spring.cloud.dataflow.stream.metrics.version";
+
+	public static final String METRICS_VERSION_1 = "1.0";
+	public static final String METRICS_VERSION_2 = "2.0";
+
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-	private final Date createdTime;
+	private Date createdTime;
 
 	private String name;
 
-	private Collection<Metric<Double>> metrics;
+	private Collection<T> metrics;
+
+	private long interval = 1000; //[ms]
 
 	private Map<String, Object> properties;
 
 	@JsonCreator
-	public ApplicationMetrics(@JsonProperty("name") String name,
-			@JsonProperty("metrics") Collection<Metric<Double>> metrics) {
+	public ApplicationMetrics(@JsonProperty("name") String name, @JsonProperty("metrics") Collection<T> metrics) {
 		this.name = name;
 		this.metrics = metrics;
 		this.createdTime = new Date();
@@ -64,16 +72,20 @@ public class ApplicationMetrics {
 		this.name = name;
 	}
 
-	public Collection<Metric<Double>> getMetrics() {
+	public Collection<T> getMetrics() {
 		return metrics;
 	}
 
-	public void setMetrics(Collection<Metric<Double>> metrics) {
+	public void setMetrics(Collection<T> metrics) {
 		this.metrics = metrics;
 	}
 
 	public Date getCreatedTime() {
 		return createdTime;
+	}
+
+	public void setCreatedTime(Date createdTime) {
+		this.createdTime = createdTime;
 	}
 
 	public Map<String, Object> getProperties() {
@@ -82,6 +94,14 @@ public class ApplicationMetrics {
 
 	public void setProperties(Map<String, Object> properties) {
 		this.properties = properties;
+	}
+
+	public long getInterval() {
+		return interval;
+	}
+
+	public void setInterval(long interval) {
+		this.interval = interval;
 	}
 
 	@Override
@@ -100,5 +120,4 @@ public class ApplicationMetrics {
 	public int hashCode() {
 		return name != null ? name.hashCode() : 0;
 	}
-
 }

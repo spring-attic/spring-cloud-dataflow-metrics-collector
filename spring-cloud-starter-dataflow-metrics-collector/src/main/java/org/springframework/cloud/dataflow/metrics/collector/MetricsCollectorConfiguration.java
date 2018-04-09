@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.MetricsCollectorEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.endpoint.RootEndpoint;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
+import org.springframework.cloud.dataflow.metrics.collector.model.Metric;
 import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
 import org.springframework.cloud.dataflow.metrics.collector.support.CaffeineHealthIndicator;
 import org.springframework.cloud.dataflow.metrics.collector.support.MetricJsonSerializer;
@@ -39,6 +40,7 @@ import org.springframework.hateoas.EntityLinks;
 /**
  * @author Mark Pollack
  * @author Vinicius Carvalho
+ * @author Christian Tzolov
  */
 @Configuration
 @EnableBinding(Sink.class)
@@ -54,14 +56,14 @@ public class MetricsCollectorConfiguration {
 	}
 
 	@Bean
-	public Cache<String, LinkedList<ApplicationMetrics>> metricsStorage() {
-		return Caffeine.<String, ApplicationMetrics> newBuilder()
+	public Cache<String, LinkedList<ApplicationMetrics<Metric<Double>>>> metricsStorage() {
+		return Caffeine.<String, ApplicationMetrics<Metric<Double>>>newBuilder()
 				.expireAfterWrite(properties.getEvictionTimeout(), TimeUnit.SECONDS).recordStats().build();
 	}
 
 	@Bean
 	public ApplicationMetricsService applicationMetricsService(
-			Cache<String, LinkedList<ApplicationMetrics>> metricsStorage) throws Exception {
+			Cache<String, LinkedList<ApplicationMetrics<Metric<Double>>>> metricsStorage) {
 		return new ApplicationMetricsService(metricsStorage);
 	}
 
@@ -82,7 +84,7 @@ public class MetricsCollectorConfiguration {
 
 	@Bean
 	public CaffeineHealthIndicator caffeineHealthIndicator(
-			Cache<String, LinkedList<ApplicationMetrics>> metricsStorage) {
+			Cache<String, LinkedList<ApplicationMetrics<Metric<Double>>>> metricsStorage) {
 		return new CaffeineHealthIndicator(metricsStorage);
 	}
 }

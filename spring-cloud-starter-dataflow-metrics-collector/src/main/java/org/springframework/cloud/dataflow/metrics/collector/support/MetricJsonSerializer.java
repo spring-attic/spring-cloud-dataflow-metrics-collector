@@ -35,8 +35,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
-import org.springframework.boot.actuate.metrics.Metric;
+
 import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.cloud.dataflow.metrics.collector.model.Metric;
 
 /**
  * @author Vinicius Carvalho
