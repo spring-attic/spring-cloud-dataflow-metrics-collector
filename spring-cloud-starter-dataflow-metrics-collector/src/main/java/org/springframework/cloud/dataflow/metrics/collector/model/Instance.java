@@ -21,8 +21,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import org.springframework.boot.actuate.metrics.Metric;
-
 /**
  * @author Vinicius Carvalho
  */

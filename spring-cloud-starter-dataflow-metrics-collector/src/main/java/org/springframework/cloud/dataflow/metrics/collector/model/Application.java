@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import org.springframework.boot.actuate.metrics.Metric;
-
 /**
  * @author Vinicius Carvalho
  */

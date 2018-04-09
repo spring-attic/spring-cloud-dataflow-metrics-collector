@@ -23,8 +23,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "spring.cloud.dataflow.metrics.collector")
 public class MetricCollectorProperties {
-	private Integer evictionTimeout = 30;
+	private Integer evictionTimeout = 90;
 
+	/**
+	 * Timeout (in seconds) before metric entry is removed from cache.  Default value is 90 seconds
+	 * @return Timeout (in seconds)
+	 */
 	public Integer getEvictionTimeout() {
 		return evictionTimeout;
 	}

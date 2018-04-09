@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.cloud.dataflow.metrics.collector.model.Application;
 import org.springframework.cloud.dataflow.metrics.collector.model.ApplicationMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.model.Instance;
+import org.springframework.cloud.dataflow.metrics.collector.model.Metric;
 import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.utils.YANUtils;
 import org.springframework.util.Assert;
@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Vinicius Carvalho
+ * @author Christian Tzolov
  */
 public class ApplicationMetricsService {
 
@@ -50,11 +51,11 @@ public class ApplicationMetricsService {
 
 	private Lock rwLock = new ReentrantLock();
 
-	private Cache<String, LinkedList<ApplicationMetrics>> storage;
+	private Cache<String, LinkedList<ApplicationMetrics<Metric<Double>>>> storage;
 
 	private Logger logger = LoggerFactory.getLogger(ApplicationMetricsService.class);
 
-	public ApplicationMetricsService(Cache<String, LinkedList<ApplicationMetrics>> storage) {
+	public ApplicationMetricsService(Cache<String, LinkedList<ApplicationMetrics<Metric<Double>>>> storage) {
 		this.storage = storage;
 	}
 
@@ -63,10 +64,10 @@ public class ApplicationMetricsService {
 	 * storage holds the last two readings in a LIFO list
 	 * @param applicationMetrics
 	 */
-	public void add(ApplicationMetrics applicationMetrics) {
+	public void add(ApplicationMetrics<Metric<Double>> applicationMetrics) {
 		try {
 			this.rwLock.lock();
-			LinkedList<ApplicationMetrics> values = this.storage.getIfPresent(applicationMetrics.getName());
+			LinkedList<ApplicationMetrics<Metric<Double>>> values = this.storage.getIfPresent(applicationMetrics.getName());
 
 			if (values == null) {
 				values = new LinkedList<>();
@@ -109,11 +110,11 @@ public class ApplicationMetricsService {
 
 			for (String streamName : streamNames) {
 				StreamMetrics streamMetrics = null;
-				List<List<ApplicationMetrics>> filteredList = storage
+				List<List<ApplicationMetrics<Metric<Double>>>> filteredList = storage
 						.asMap().values().stream().filter(applicationMetrics -> applicationMetrics.getFirst()
 								.getProperties().get(ApplicationMetrics.STREAM_NAME).equals(streamName))
 						.collect(Collectors.toList());
-				for (List<ApplicationMetrics> applicationMetricsList : filteredList) {
+				for (List<ApplicationMetrics<Metric<Double>>> applicationMetricsList : filteredList) {
 					streamMetrics = convert(applicationMetricsList, streamMetrics);
 				}
 				if (streamMetrics != null) {
@@ -136,10 +137,10 @@ public class ApplicationMetricsService {
 	 * @return a hierarchical view of metrics using {@link StreamMetrics} as the root
 	 * object
 	 */
-	private StreamMetrics convert(List<ApplicationMetrics> applicationMetricsList, StreamMetrics root) {
+	private StreamMetrics convert(List<ApplicationMetrics<Metric<Double>>> applicationMetricsList, StreamMetrics root) {
 
 		// For most properties, we should take the last inserted element on the list
-		ApplicationMetrics applicationMetrics = applicationMetricsList.get(0);
+		ApplicationMetrics<Metric<Double>> applicationMetrics = applicationMetricsList.get(0);
 
 		Assert.notNull(applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_NAME),
 				"Missing STREAM_NAME from metrics properties");
@@ -168,7 +169,15 @@ public class ApplicationMetricsService {
 
 		instance.setProperties(applicationMetrics.getProperties());
 		instance.setKey(applicationMetrics.getName());
-		instance.getMetrics().addAll(computeRate(applicationMetricsList));
+
+		if (ApplicationMetrics.METRICS_VERSION_2.equals(getMetricsVersion(applicationMetrics))) {
+			instance.setMetrics(applicationMetrics.getMetrics().stream()
+					.filter(metric -> metric.getName().matches("integration\\.channel\\.(\\w*)\\.send\\.mean"))
+					.collect(Collectors.toList()));
+		}
+		else {
+			instance.getMetrics().addAll(computeRate(applicationMetricsList));
+		}
 
 		int applicationIndex = streamMetrics.getApplications().indexOf(application);
 		if (applicationIndex < 0) {
@@ -184,15 +193,19 @@ public class ApplicationMetricsService {
 		return streamMetrics;
 	}
 
-	private List<Metric<Double>> computeRate(List<ApplicationMetrics> applicationMetricsList) {
+	public String getMetricsVersion(ApplicationMetrics<Metric<Double>> applicationMetrics) {
+		return (String) applicationMetrics.getProperties().get(ApplicationMetrics.STREAM_METRICS_VERSION);
+	}
+
+	private List<Metric<Double>> computeRate(List<ApplicationMetrics<Metric<Double>>> applicationMetricsList) {
 		List<Metric<Double>> result = new ArrayList<>();
-		ApplicationMetrics applicationMetrics = applicationMetricsList.get(0);
+		ApplicationMetrics<Metric<Double>> applicationMetrics = applicationMetricsList.get(0);
 		for (Metric<Double> metric : applicationMetrics.getMetrics()) {
 			Matcher matcher = pattern.matcher(metric.getName());
 			if (matcher.matches()) {
 				Metric previous = applicationMetricsList.size() < 2 ? null
 						: findMetric(applicationMetricsList.get(1).getMetrics(), metric.getName());
-				result.add(new Metric<Double>("integration.channel." + matcher.group(1) + ".send.mean",
+				result.add(new Metric<>("integration.channel." + matcher.group(1) + ".send.mean",
 						delta(metric, previous)));
 			}
 		}
@@ -210,14 +223,7 @@ public class ApplicationMetricsService {
 	}
 
 	private Metric<Double> findMetric(Collection<Metric<Double>> metrics, String name) {
-		Metric<Double> result = null;
-		Optional<Metric<Double>> optinal = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
-		if (optinal.isPresent()) {
-			result = optinal.get();
-		}
-		else {
-			result = new Metric<Double>(name, 0.0);
-		}
-		return result;
+		Optional<Metric<Double>> optional = metrics.stream().filter(metric -> metric.getName().equals(name)).findFirst();
+		return optional.isPresent() ? optional.get() : new Metric<>(name, 0.0);
 	}
 }
