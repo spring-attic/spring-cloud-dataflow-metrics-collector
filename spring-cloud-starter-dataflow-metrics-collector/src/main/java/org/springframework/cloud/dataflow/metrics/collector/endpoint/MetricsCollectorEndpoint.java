@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.metrics.collector.endpoint;
 
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 import org.springframework.cloud.dataflow.metrics.collector.model.StreamMetrics;
 import org.springframework.cloud.dataflow.metrics.collector.services.ApplicationMetricsService;
@@ -41,8 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StreamMetrics.class)
 public class MetricsCollectorEndpoint {
 
-	private final Pattern pattern = Pattern.compile("integration\\.channel\\.(\\w*)\\.sendCount");
-
 	private ApplicationMetricsService service;
 
 	public MetricsCollectorEndpoint(ApplicationMetricsService service) {
@@ -61,7 +58,7 @@ public class MetricsCollectorEndpoint {
 		PagedResources<StreamMetrics> pagedResources = new PagedResources<>(entries, pageMetadata,
 				ControllerLinkBuilder.linkTo(MetricsCollectorEndpoint.class).withRel(Link.REL_SELF));
 
-		return new ResponseEntity<PagedResources<StreamMetrics>>(pagedResources, HttpStatus.OK);
+		return new ResponseEntity<>(pagedResources, HttpStatus.OK);
 	}
 
 }
