@@ -6,16 +6,20 @@ The metrics collector is a companion application to the http://cloud.spring.io/s
 It collects metrics emitted by http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] apps, and groups them together around the stream definition that dataflow used to deploy them.
 
 All of the OOB http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud App Starters] currently have the metrics emitter module already bundled on it.
-You can enable metric emission by setting a flag explained http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html#_metrics_emitter[here]
+You can enable metric emission by setting the destination name for metrics binding, e.g. `spring.cloud.stream.bindings.applicationMetrics.destination=<DESTINATION_NAME>`
+
+Starting with Spring Cloud Stream 2.0 the metrics has been switched to use https://micrometer.io/[Micrometer]. See https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/#spring-cloud-stream-overview-metrics-emitter [Metrics Emitter] for more details
+Information how to configure the metrics for legacy Spring Cloud Stream 1.x applications is provided https://docs.spring.io/spring-cloud-stream/docs/Ditmars.SR3/reference/htmlsingle/#_metrics_emitter[here].
+
+The metrics collector 2.x can collect and process metrics coming from Spring Cloud Stream 1.x and 2.x applications.
 
 ## Downloadable Links for Latest GA Releases for Metrics Collector Uber Jars and Docker Images
 
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/1.0.0.RELEASE/metrics-collector-rabbit-1.0.0.RELEASE.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:1.0.0.RELEASE]
-|metrics-collector-kafka-09| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-09/1.0.0.RELEASE/metrics-collector-kafka-09-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-09/tags/ [docker pull metrics-collector-kafka-09:1.0.0.RELEASE]
-|metrics-collector-kafka-10| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-10/1.0.0.RELEASE/metrics-collector-kafka-10-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-10/tags/ [docker pull metrics-collector-kafka-10:1.0.0.RELEASE]
+|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/2.0.0.RELEASE/metrics-collector-rabbit-2.0.0.RELEASE.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.RELEASE]
+|metrics-collector-kafka| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka/2.0.0.RELEASE/metrics-collector-kafka-2.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.RELEASE]
 |======================
 
 ## Downloadable Links for Latest Snapshots for Metrics Collector Uber Jars and Docker Images
@@ -23,9 +27,8 @@ You can enable metric emission by setting a flag explained http://docs.spring.io
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/1.0.1.BUILD-SNAPSHOT/metrics-collector-rabbit-1.0.1.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:1.0.1.BUILD-SNAPSHOT]
-|metrics-collector-kafka-09| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka-09/1.0.1.BUILD-SNAPSHOT/metrics-collector-kafka-09-1.0.1.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-09/tags/ [docker pull metrics-collector-kafka-09:1.0.1.BUILD-SNAPSHOT]
-|metrics-collector-kafka-10| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka-10/1.0.1.BUILD-SNAPSHOT/metrics-collector-kafka-10-1.0.1.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-10/tags/ [docker pull metrics-collector-kafka-10:1.0.1.BUILD-SNAPSHOT]
+|metrics-collector-rabbit| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/2.0.1.BUILD-SNAPSHOT/metrics-collector-rabbit-2.0.1.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.1.BUILD-SNAPSHOT]
+|metrics-collector-kafka| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka/2.0.1.BUILD-SNAPSHOT/metrics-collector-kafka-2.0.1.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.1.BUILD-SNAPSHOT]
 |======================
 
 == Building
@@ -44,8 +47,7 @@ This will generate an `apps` folder like the one below:
 
 ```
 apps
-├── metrics-collector-kafka-09
-├── metrics-collector-kafka-10
+├── metrics-collector-kafka
 ├── metrics-collector-rabbit
 └── pom.xml
 ```
@@ -63,7 +65,7 @@ You should find the *uber jar* of the collector inside your `target` folder.
 
 The collector is an *uber jar* following the same principles of any Spring Cloud Stream app.
 So it means, that you need to provide connection information to the broker that you are using.
-Just follow the instructions on http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html[Spring Cloud Stream] docs on how to configure each binder.
+Just follow the instructions on https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/index.html[Spring Cloud Stream] docs on how to configure each binder.
 If you are deploying on a platform such as cloudfoundry, you only need to bind a rabbitmq service to the collector.
 
 === Configuring
@@ -79,14 +81,14 @@ Assuming apps have been deployed configuring `spring.cloud.stream.bindings.appli
 
 === Controlling eviction
 
-Internally the collector maintains a cache of the metrics it receives. The default for metric emission is every 5 seconds, but can be tuned on the application by using Spring Boot's metrics exporter scheduling control, please refer to the docs http://docs.spring.io/spring-cloud-stream/docs/Chelsea.SR1/reference/htmlsingle/index.html#_metrics_emitter[here] to configure your applications.
+Internally the collector maintains a cache of the metrics it receives. The default for metric emission is every 60 seconds (for Spring Boot 1.x applications it is every 5 seconds), but can be tuned on the application by using Spring Boot's metrics exporter scheduling control, please refer to the docs https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/index.html#spring-cloud-stream-overview-metrics-emitter[here] to configure your applications.
 
-The default for the collector is to evict any metric reading that was not updated over the past 30 seconds.
+The default for the collector is to evict any metric reading that was not updated over the past 90 seconds.
 You can however change this value by setting the property `spring.cloud.dataflow.metrics.collector.evictionTimeout`
 
 == Security
 
-The collector will have security enabled by default, make sure you start it with a proper username/password using `--security.user.name` and `--security.user.password`
+The collector will have security enabled by default, make sure you start it with a proper username/password using `--spring.security.user.name` and `--spring.security.user.password`
 
 == E2E Cheat sheet
 
@@ -94,14 +96,15 @@ The following is just a sample of commands that one can use to get the collector
 
 ```
 Collector:
-java -jar target/metrics-collector-rabbit-1.0.0.BUILD-SNAPSHOT.jar --security.user.name=spring --security.user.password=cloud
+java -jar target/metrics-collector-rabbit-2.0.0.BUILD-SNAPSHOT.jar --spring.security.user.name=spring --spring.security.user.password=cloud
 
 Server:
-java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.2.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080 --spring.cloud.dataflow.metrics.collector.username=spring --spring.cloud.dataflow.metrics.collector.password=cloud
+java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.5.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080 --spring.cloud.dataflow.metrics.collector.username=spring --spring.cloud.dataflow.metrics.collector.password=cloud
 
-Register Apps:
-app import --uri http://bit.ly/Bacon-RELEASE-stream-applications-rabbit-maven
+Register SCSt 1.x Apps:
+app import --uri http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven
 
+Or Register SCSt 2.x Apps: TODO
 
 Stream:
 stream create --name foostream --definition "time | log"
