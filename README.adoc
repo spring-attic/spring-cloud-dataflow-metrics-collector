@@ -8,18 +8,18 @@ It collects metrics emitted by http://cloud.spring.io/spring-cloud-stream/[Sprin
 All of the OOB http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud App Starters] currently have the metrics emitter module already bundled on it.
 You can enable metric emission by setting the destination name for metrics binding, e.g. `spring.cloud.stream.bindings.applicationMetrics.destination=<DESTINATION_NAME>`
 
-Starting with Spring Cloud Stream 2.0 the metrics has been switched to use https://micrometer.io/[Micrometer]. See https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/#spring-cloud-stream-overview-metrics-emitter [Metrics Emitter] for more details
-Information how to configure the metrics for legacy Spring Cloud Stream 1.x applications is provided https://docs.spring.io/spring-cloud-stream/docs/Ditmars.SR3/reference/htmlsingle/#_metrics_emitter[here].
+Starting with Spring Cloud Stream 2.0, the default metrics support has been switched to use https://micrometer.io/[Micrometer]. See https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/#spring-cloud-stream-overview-metrics-emitter[Metrics Emitter] for more details.
+For information on how to configure the metrics-emitter for Spring Cloud Stream 1.x applications, see https://docs.spring.io/spring-cloud-stream/docs/Ditmars.SR3/reference/htmlsingle/#_metrics_emitter[here].
 
-The metrics collector 2.x can collect and process metrics coming from Spring Cloud Stream 1.x and 2.x applications.
+The metrics collector 2.x can collect and process metrics coming from both Spring Cloud Stream 1.x and 2.x applications.
 
 ## Downloadable Links for Latest GA Releases for Metrics Collector Uber Jars and Docker Images
 
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/2.0.0.RELEASE/metrics-collector-rabbit-2.0.0.RELEASE.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.RELEASE]
-|metrics-collector-kafka| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka/2.0.0.RELEASE/metrics-collector-kafka-2.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.RELEASE]
+|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/2.0.0.M1/metrics-collector-rabbit-2.0.0.M1.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.M1]
+|metrics-collector-kafka| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka/2.0.0.M1/metrics-collector-kafka-2.0.0.M1.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.M1]
 |======================
 
 ## Downloadable Links for Latest Snapshots for Metrics Collector Uber Jars and Docker Images
@@ -27,8 +27,8 @@ The metrics collector 2.x can collect and process metrics coming from Spring Clo
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/2.0.1.BUILD-SNAPSHOT/metrics-collector-rabbit-2.0.1.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.1.BUILD-SNAPSHOT]
-|metrics-collector-kafka| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka/2.0.1.BUILD-SNAPSHOT/metrics-collector-kafka-2.0.1.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.1.BUILD-SNAPSHOT]
+|metrics-collector-rabbit| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/2.0.0.BUILD-SNAPSHOT/metrics-collector-rabbit-2.0.0.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.BUILD-SNAPSHOT]
+|metrics-collector-kafka| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka/2.0.0.BUILD-SNAPSHOT/metrics-collector-kafka-2.0.0.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.BUILD-SNAPSHOT]
 |======================
 
 == Building
@@ -70,21 +70,20 @@ If you are deploying on a platform such as cloudfoundry, you only need to bind a
 
 === Configuring
 
-The default destination that the collector listens to is named `metrics`.  You
-can override this default by setting the property
+The default destination that the collector listens to is named `metrics`.  You can override this default by setting the property
 `spring.cloud.stream.bindings.input.destination=<DESTINATION_NAME>`
-This should match the destination that Spring Cloud Stream applications
-use to send metrics, which is set using the property
+This should match the destination that Spring Cloud Stream applications use to send metrics, which is set using the property
 `spring.cloud.stream.bindings.applicationMetrics.destination=<DESTINATION_NAME>`
 
 Assuming apps have been deployed configuring `spring.cloud.stream.bindings.applicationMetrics.destination=metrics`.  For the RabbitMQ binder, the collector will create an anonymous consumer to an exchange called `metrics`.  For the Kafka binder, the collector creates a Kafka topic named `metrics`.
 
 === Controlling eviction
 
-Internally the collector maintains a cache of the metrics it receives. The default for metric emission is every 60 seconds (for Spring Boot 1.x applications it is every 5 seconds), but can be tuned on the application by using Spring Boot's metrics exporter scheduling control, please refer to the docs https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/index.html#spring-cloud-stream-overview-metrics-emitter[here] to configure your applications.
+Internally the collector maintains a cache of the metrics it receives. The default for metric emission is every 60 seconds SCSt 2.x and 5 seconds for SCSt 1.x applications, but can be tuned on the application by using Spring Boot's metrics exporter scheduling control, please refer to the docs https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/index.html#spring-cloud-stream-overview-metrics-emitter[here] to configure your applications.
 
-The default for the collector is to evict any metric reading that was not updated over the past 90 seconds.
-You can however change this value by setting the property `spring.cloud.dataflow.metrics.collector.evictionTimeout`
+The default for the collector is to evict any metric reading that was not updated over the past 90 seconds. You can however change this value by setting the property `spring.cloud.dataflow.metrics.collector.evictionTimeout`
+
+Note: It is important that the eviction time is set to a value higher thant the emission time!
 
 == Security
 
