@@ -17,7 +17,7 @@ The metrics collector 2.x support collecting metrics from both Spring Cloud Stre
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-milestone/org/springframework/cloud/metrics-collector-rabbit/2.0.0.RELEASE/metrics-collector-rabbit-2.0.0.M1.jar | https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.M1]
+|metrics-collector-rabbit| http://repo.spring.io/libs-milestone/org/springframework/cloud/metrics-collector-rabbit/2.0.0.M1/metrics-collector-rabbit-2.0.0.M1.jar | https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.M1]
 |metrics-collector-kafka| http://repo.spring.io/libs-milestone/org/springframework/cloud/metrics-collector-kafka/2.0.0.M1/metrics-collector-kafka-2.0.0.M1.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.M1]
 |======================
 
