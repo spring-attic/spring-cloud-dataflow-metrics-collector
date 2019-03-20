@@ -1,10 +1,10 @@
 == Spring Cloud Data Flow Metrics Collector
 
-The metrics collector is a companion application to the http://cloud.spring.io/spring-cloud-dataflow/[Spring Cloud Data Flow] server.
+The metrics collector is a companion application to the https://cloud.spring.io/spring-cloud-dataflow/[Spring Cloud Data Flow] server.
 
-It collects metrics emitted by http://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] apps, and groups them together around the stream definition that dataflow used to deploy them.
+It collects metrics emitted by https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] apps, and groups them together around the stream definition that dataflow used to deploy them.
 
-All of the OOB http://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud App Starters] currently have the metrics emitter module already bundled on it.
+All of the OOB https://cloud.spring.io/spring-cloud-stream-app-starters/[Spring Cloud App Starters] currently have the metrics emitter module already bundled on it.
 You can enable metric emission by setting the destination name for metrics binding, e.g. `spring.cloud.stream.bindings.applicationMetrics.destination=<DESTINATION_NAME>`
 
 Starting with Spring Cloud Stream 2.0, the default metrics support has been switched to use https://micrometer.io/[Micrometer]. See https://docs.spring.io/spring-cloud-stream/docs/Elmhurst.RELEASE/reference/htmlsingle/#spring-cloud-stream-overview-metrics-emitter[Metrics Emitter] for more details.
@@ -17,8 +17,8 @@ The metrics collector 2.x support collecting metrics from both Spring Cloud Stre
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/2.0.0.RELEASE/metrics-collector-rabbit-2.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.RELEASE]
-|metrics-collector-kafka| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka/2.0.0.RELEASE/metrics-collector-kafka-2.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.RELEASE]
+|metrics-collector-rabbit| https://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/2.0.0.RELEASE/metrics-collector-rabbit-2.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.RELEASE]
+|metrics-collector-kafka| https://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka/2.0.0.RELEASE/metrics-collector-kafka-2.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.RELEASE]
 |======================
 
 ## Downloadable Links for Latest 1.0 GA Releases for Metrics Collector Uber Jars and Docker Images
@@ -26,9 +26,9 @@ The metrics collector 2.x support collecting metrics from both Spring Cloud Stre
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/1.0.0.RELEASE/metrics-collector-rabbit-1.0.0.RELEASE.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:1.0.0.RELEASE]
-|metrics-collector-kafka-09| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-09/1.0.0.RELEASE/metrics-collector-kafka-09-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-09/tags/ [docker pull metrics-collector-kafka-09:1.0.0.RELEASE]
-|metrics-collector-kafka-10| http://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-10/1.0.0.RELEASE/metrics-collector-kafka-10-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-10/tags/ [docker pull metrics-collector-kafka-10:1.0.0.RELEASE]
+|metrics-collector-rabbit| https://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-rabbit/1.0.0.RELEASE/metrics-collector-rabbit-1.0.0.RELEASE.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:1.0.0.RELEASE]
+|metrics-collector-kafka-09| https://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-09/1.0.0.RELEASE/metrics-collector-kafka-09-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-09/tags/ [docker pull metrics-collector-kafka-09:1.0.0.RELEASE]
+|metrics-collector-kafka-10| https://repo.spring.io/libs-release/org/springframework/cloud/metrics-collector-kafka-10/1.0.0.RELEASE/metrics-collector-kafka-10-1.0.0.RELEASE.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka-10/tags/ [docker pull metrics-collector-kafka-10:1.0.0.RELEASE]
 |======================
 
 ## Downloadable Links for Latest 2.0 Snapshots for Metrics Collector Uber Jars and Docker Images
@@ -36,8 +36,8 @@ The metrics collector 2.x support collecting metrics from both Spring Cloud Stre
 [width="40%",frame="topbot",options="header,footer"]
 |======================
 |Uber Jar |Http Link |Docker Hub Link
-|metrics-collector-rabbit| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/2.0.0.BUILD-SNAPSHOT/metrics-collector-rabbit-2.0.0.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.BUILD-SNAPSHOT]
-|metrics-collector-kafka| http://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka/2.0.0.BUILD-SNAPSHOT/metrics-collector-kafka-2.0.0.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.BUILD-SNAPSHOT]
+|metrics-collector-rabbit| https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-rabbit/2.0.0.BUILD-SNAPSHOT/metrics-collector-rabbit-2.0.0.BUILD-SNAPSHOT.jar| https://hub.docker.com/r/springcloud/metrics-collector-rabbit/tags/ [docker pull metrics-collector-rabbit:2.0.0.BUILD-SNAPSHOT]
+|metrics-collector-kafka| https://repo.spring.io/libs-snapshot-local/org/springframework/cloud/metrics-collector-kafka/2.0.0.BUILD-SNAPSHOT/metrics-collector-kafka-2.0.0.BUILD-SNAPSHOT.jar | https://hub.docker.com/r/springcloud/metrics-collector-kafka/tags/ [docker pull metrics-collector-kafka:2.0.0.BUILD-SNAPSHOT]
 |======================
 
 == Building
@@ -110,7 +110,7 @@ Server:
 java -jar spring-cloud-dataflow-server-local/target/spring-cloud-dataflow-server-local-1.5.0.BUILD-SNAPSHOT.jar --spring.cloud.dataflow.metrics.collector.uri=http://localhost:8080 --spring.cloud.dataflow.metrics.collector.username=spring --spring.cloud.dataflow.metrics.collector.password=cloud
 
 Register SCSt 1.x Apps:
-app import --uri http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven
+app import --uri https://bit.ly/Celsius-SR1-stream-applications-rabbit-maven
 
 Stream:
 stream create --name foostream --definition "time | log"
